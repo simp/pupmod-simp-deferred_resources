@@ -1,0 +1,6 @@
+* Thu Jul 5 2018 Jeanne Greulich <jeannegreulich@onyxpoint.com> - 0.1.0
+- This module supports adding lists of packages to the catalog
+  after the all the manifests have been compiled.
+  Its purpose is to support things like STIG enforcement, and is not
+  meant for regular use.
+- initial creation of module
