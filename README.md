@@ -6,6 +6,20 @@
 
 #### Table of Contents
 
+<!-- vim-markdown-toc GFM -->
+
+* [Description](#description)
+  * [This is a SIMP module](#this-is-a-simp-module)
+* [Usage](#usage)
+  * [Example: Managing Packages](#example-managing-packages)
+  * [Example: Managing Packages but silencing messages](#example-managing-packages-but-silencing-messages)
+* [Reference](#reference)
+* [Limitations](#limitations)
+* [Development](#development)
+  * [Acceptance tests](#acceptance-tests)
+
+<!-- vim-markdown-toc -->
+
 ## Description
 
 This module provides capabilities to add resources to the puppet catalog
@@ -40,55 +54,33 @@ it can be used independently:
    [`simp/simp_options`](https://github.com/simp/pupmod-simp-simp_options) for
    details.
 
-## Setup
-
 ## Usage
 
 This module provides classes that help users properly use the underlying native
 type for processing deferred resources.
 
+### Example: Managing Packages
+
 ```
   class { 'deferred_resources::package':
-    resource_list => $my package_list',
-    default_attr  => $my_default_attr,
-    mode          => $my_mode,
+    'remove'  => ['pkg1', 'pkg2'],
+    'install' => ['pkg3', 'pkg4'],
+    'mode'    => 'enforcing'
   }
 ```
 
-package_list  is a list of packages to install. It can be either a Hash of the form:
-     'Package Name' => { Hash of Attirbutes }
-     an array of names of packages.  If it is an Array then the default attributes
-     must not be entry.
-default_attr  is a Hash of attributes to apply to all packages in the list.
+### Example: Managing Packages but silencing messages
 
-mode is either
-     'warning' - The package will not be added to the catalog but a warning
-          will be printed out to indicate it is missing.
-     'enforcing' - A package resource will be added to the catalog for the package.
-EXAMPLE #1:
-$package_list = ['rsh','rsh-server',ypserv']
-$default_attr = {'ensure' => 'absent'}
-
-deffered_packages { 'STIG_PACKAGES':
-    package_list => $package_list,
-    default_attr => $default_attr,
-    mode         => 'enforcing'
-}
-
-EXAMPLE #2
-
-$package_list = {
-  'ypserv' => {'ensure' => 'absent'},
-  'screen' => {'ensure' => 'presnet'}
-}
-
-deferred_pacakges { 'STIG_PACKAGES':
-   package_list => $package_list,
-   mode         => 'warning'
-}
+```
+  class { 'deferred_resources::package':
+    'remove'    => ['pkg1', 'pkg2'],
+    'install'   => ['pkg3', 'pkg4'],
+    'mode'      => 'enforcing',
+    'log_level' => 'debug'
+  }
+```
 
 ## Reference
-
 
 Please refer to the inline documentation within each source file, or to the
 module's generated YARD documentation for reference material.
