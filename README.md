@@ -1,23 +1,23 @@
-**FIXME**: Ensure the badges are correct and complete, then remove this message!
-
-[![License](http://img.shields.io/:license-apache-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html) [![Build Status](https://travis-ci.org/simp/pupmod-simp-deferred_resources.svg)](https://travis-ci.org/simp/pupmod-simp-deferred_resources) [![SIMP compatibility](https://img.shields.io/badge/SIMP%20compatibility-6.*-orange.svg)](https://img.shields.io/badge/SIMP%20compatibility-6.*-orange.svg)
+[![License](https://img.shields.io/:license-apache-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/73/badge)](https://bestpractices.coreinfrastructure.org/projects/73)
+[![Puppet Forge](https://img.shields.io/puppetforge/v/simp/deferred_resources.svg)](https://forge.puppetlabs.com/simp/deferred_resources)
+[![Puppet Forge Downloads](https://img.shields.io/puppetforge/dt/simp/deferred_resources.svg)](https://forge.puppetlabs.com/simp/deferred_resources)
+[![Build Status](https://travis-ci.org/simp/pupmod-simp-deferred_resources.svg)](https://travis-ci.org/simp/pupmod-simp-deferred_resources)
 
 #### Table of Contents
 
-1. [Description](#description)
-2. [Setup - The basics of getting started with deferred_resources](#setup)
-    * [What deferred_resources affects](#what-deferred_resources-affects)
-    * [Setup requirements](#setup-requirements)
-    * [Beginning with deferred_resources](#beginning-with-deferred_resources)
-3. [Usage - Configuration options and additional functionality](#usage)
-4. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
-5. [Limitations - OS compatibility, etc.](#limitations)
-6. [Development - Guide for contributing to the module](#development)
-    * [Acceptance Tests - Beaker env variables](#acceptance-tests)
-
 ## Description
 
-This module provides custom types to add resources to the catalog after all manifests have been compiled.  It is not recommended for general use.  It was developed for a specific circumstance where the STIG required packages to be installed.  In order to not interfer with other manifests that might have included resources, it first checks if the resource has been included in the catalog and creates it.  
+This module provides capabilities to add resources to the puppet catalog
+**after** the initial compilation has been compiled.
+
+**WARNING:** This module is not recommended for use outside of the SIMP
+framework. It was developed for specific policy requirements from the DISA
+STIG, CIS Benchmark, etc... that require packages to either be installed or
+removed.  In order to not interfere with other manifests that might have
+legitimately added package resource, it first checks if the resource has been
+included in the catalog and then adds the appropriate resource to install or
+remove it as necessary.
 
 ### This is a SIMP module
 
@@ -44,13 +44,16 @@ it can be used independently:
 
 ## Usage
 
-This module provide a type deferred_packages
+This module provides classes that help users properly use the underlying native
+type for processing deferred resources.
 
-   deferred_packages { 'my_packages':
-      package_list => $my package_list',
-      default_attr => $my_default_attr,
-      mode         => $my_mode,
-   }
+```
+  class { 'deferred_resources::package':
+    resource_list => $my package_list',
+    default_attr  => $my_default_attr,
+    mode          => $my_mode,
+  }
+```
 
 package_list  is a list of packages to install. It can be either a Hash of the form:
      'Package Name' => { Hash of Attirbutes }
@@ -58,7 +61,7 @@ package_list  is a list of packages to install. It can be either a Hash of the f
      must not be entry.
 default_attr  is a Hash of attributes to apply to all packages in the list.
 
-mode is either 
+mode is either
      'warning' - The package will not be added to the catalog but a warning
           will be printed out to indicate it is missing.
      'enforcing' - A package resource will be added to the catalog for the package.
