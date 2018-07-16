@@ -4,13 +4,13 @@ Puppet::Type.newtype(:deferred_resources) do
       helper classes in the module.
 
       This type will process after the catalog has been compiled but before it
-      is applied.  It takes a list of resources and checks for the existance of
+      is applied.  It takes a list of resources and checks for the existence of
       that resource in the compiled catalog. If the resource has already been
-      defined in the catalog then it prints out a warning that an action will
-      not be performed unless warnings are disabled.
+      defined in the catalog, it prints out a message that an action will
+      not be performed.
 
-      If mode is set to `warning` then print out a list of resources that would
-      have been added but don't add them to the catalog.
+      If mode is set to `warning`, instead of adding resources to the catalog,
+      it prints out a list of resources that would have been added.
   EOM
 
   newparam(:name) do
@@ -126,15 +126,17 @@ Puppet::Type.newtype(:deferred_resources) do
         if (Array(opts) - Array(existing_resource.to_hash)).empty?
           Puppet.debug("deferred_resources: Ignoring existing resource #{resource_log_name}")
         else
-          Puppet.send(self[:log_level], "deferred_resources: Existing resource '#{resource_log_name}' at '#{existing_resource.file}:#{existing_resource.line}' has options that differ from those specified in the :resources Hash")
+          Puppet.send(self[:log_level], "deferred_resources: Existing resource '#{resource_log_name}' at '#{existing_resource.file}:#{existing_resource.line}' has options that differ from deferred_resources::<x> parameters")
         end
       else
+        opts_minus_name = opts.dup
+        opts_minus_name.delete(:name)
         if self[:mode] == :enforcing
           catalog.create_resource(resource_type, opts)
 
-          Puppet.debug("deferred_resources: Created #{resource_log_name}")
+          Puppet.debug("deferred_resources: Created #{resource_log_name} with #{opts_minus_name}")
         else
-          Puppet.send(self[:log_level], "deferred_resources: Would have created #{resource_log_name}")
+          Puppet.send(self[:log_level], "deferred_resources: Would have created #{resource_log_name} with #{opts_minus_name}")
         end
       end
     end

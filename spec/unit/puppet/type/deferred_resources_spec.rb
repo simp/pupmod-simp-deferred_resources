@@ -147,7 +147,7 @@ describe deferred_resources_type do
         resource.autorequire
       end
 
-      it 'should log on an exsiting resource with different options' do
+      it 'should log on an existing resource with different options' do
         resource = deferred_resources_type.new(
           :name => 'foo',
           :resource_type => 'package',
@@ -161,7 +161,7 @@ describe deferred_resources_type do
 
         @catalog.create_resource('Package', {'name' => 'mypackage', 'ensure' => 'absent'})
 
-        Puppet.expects(:send).with(:warning, "deferred_resources: Existing resource 'Package[mypackage]' at ':' has options that differ from those specified in the :resources Hash").once
+        Puppet.expects(:send).with(:warning, "deferred_resources: Existing resource 'Package[mypackage]' at ':' has options that differ from deferred_resources::<x> parameters").once
 
         resource.autorequire
       end
@@ -173,10 +173,11 @@ describe deferred_resources_type do
           :name => 'foo',
           :resource_type => 'package',
           :resources => ['mypackage'],
-          :mode => 'warning'
+          :mode => 'warning',
+          :default_options => { 'ensure' => 'absent' }
         )
 
-        Puppet.expects(:send).with(:warning, 'deferred_resources: Would have created Package[mypackage]').once
+        Puppet.expects(:send).with(:warning, 'deferred_resources: Would have created Package[mypackage] with {:ensure=>"absent"}').once
 
         resource.autorequire
 

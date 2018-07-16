@@ -46,17 +46,20 @@ deferred_resources::log_level: 'debug'
         end
 
         it 'should have correct packages installed' do
+          # package with ensure absent
           ['screen'].each do |pkg|
-              expect(host.check_for_package(pkg)).to be === false
+              expect(host.check_for_package(pkg)).to eq false
           end
+
+          # previously installed package and package with ensure present
           ['ypserv','rsh-server'].each do |pkg|
-              expect(host.check_for_package(pkg)).to be === true
+              expect(host.check_for_package(pkg)).to eq true
           end
         end
 
       end
 
-      context 'with mode set to warning and enable warnings set to false' do
+      context "with 'warning' mode and packages to ensure removed/installed" do
         it 'should set up hieradata' do
           set_hieradata_on(host, hieradata)
         end
@@ -64,26 +67,38 @@ deferred_resources::log_level: 'debug'
         it 'should output messages but not install or remove packages' do
           install_package host, 'ypserv'
           result = apply_manifest_on(host, manifest, :accept_all_exit_codes => true)
+
+          # packages ignored by deferred_resources because they are already in the catalogue
           ['screen','rsh-server'].each do |pkg|
             expect(result.stdout).to match(/Existing resource 'Package\[#{pkg}\]' .+ has options that differ/m)
           end
+
+          # packages that are only in deferred_resources::packages::remove
           ['vsftpd','ypserv'].each do |pkg|
-             expect(result.stdout).to match(/Would have created Package\[#{pkg}\]/m)
+             expect(result.stdout).to match(/Would have created Package\[#{pkg}\] with .*:ensure=>"absent"/m)
           end
+
+          # packages that are only in deferred_resources::packages::install
           ['esc','zsh'].each do |pkg|
-             expect(result.stdout).to match(/Would have created Package\[#{pkg}\]/m)
+             expect(result.stdout).to match(/Would have created Package\[#{pkg}\] with.*:ensure=>"present"/m)
           end
         end
-        it 'should  not have changed the packages installed' do
+
+        it 'should not have changed the packages installed' do
+          # package removed by another catalogue resource
           ['screen'].each do |pkg|
-              expect(host.check_for_package(pkg)).to be === false
+              expect(host.check_for_package(pkg)).to eq false
           end
+
+          # 1 package that would have been removed by deferred_resources and
+          # 1 package installed by another catalog resource
           ['ypserv','rsh-server'].each do |pkg|
-              expect(host.check_for_package(pkg)).to be === true
+              expect(host.check_for_package(pkg)).to eq true
           end
         end
       end
-      context 'with mode set to enforce ' do
+
+      context "with 'enforce' mode, 'debug' log_level, and packages to ensure removed/installed" do
         it 'should set up hieradata' do
           set_hieradata_on(host, hieradata + hieradata_enforce )
         end
@@ -91,20 +106,30 @@ deferred_resources::log_level: 'debug'
         it 'should not output messages when the manifest it applied' do
           install_package host, 'ypserv'
           result = apply_manifest_on(host, manifest, :accept_all_exit_codes => true)
+
+          # packages ignored by deferred_resources because they are already in the catalogue
           ['screen','rsh-server'].each do |pkg|
             expect(result.stdout).not_to match(/Existing resource 'Package\[#{pkg}\]' .+ has options that differ/m)
           end
+
+          # packages that are only in deferred_resources::packages::remove or
+          # deferred_resources::packages::install
           ['vsftpd','ypserv','esc','zsh'].each do |pkg|
              expect(result.stdout).not_to match(/Would have created Package\[#{pkg}\]/m)
           end
         end
 
         it 'should have removed and installed packages' do
+          # 1st package removed by another catalog resource and 2 remaining packages
+          # removed by deferred_resources
           ['screen','ypserv','vsftpd'].each do |pkg|
-              expect(host.check_for_package(pkg)).to be === false
+              expect(host.check_for_package(pkg)).to eq false
           end
-          ['zsh','rsh-server','esc'].each do |pkg|
-              expect(host.check_for_package(pkg)).to be === true
+
+          # 1st package installed by another catalog resource and 2 remaining packages
+          # removed by deferred_resources
+          ['rsh-server','esc', 'zsh'].each do |pkg|
+              expect(host.check_for_package(pkg)).to eq true
           end
         end
       end

@@ -29,9 +29,9 @@ This module provides capabilities to add resources to the puppet catalog
 framework. It was developed for specific policy requirements from the DISA
 STIG, CIS Benchmark, etc... that require packages to either be installed or
 removed.  In order to not interfere with other manifests that might have
-legitimately added package resource, it first checks if the resource has been
-included in the catalog and then adds the appropriate resource to install or
-remove it as necessary.
+legitimately added package resources, it first checks if each resource has
+already been included in the catalog and then adds the appropriate resource
+to install or remove that resource, as necessary.
 
 ### This is a SIMP module
 

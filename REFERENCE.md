@@ -158,13 +158,13 @@ WARNING: This type is **NOT** meant to be called directly. Please use the
 helper classes in the module.
 
 This type will process after the catalog has been compiled but before it
-is applied.  It takes a list of resources and checks for the existance of
+is applied.  It takes a list of resources and checks for the existence of
 that resource in the compiled catalog. If the resource has already been
-defined in the catalog then it prints out a warning that an action will
-not be performed unless warnings are disabled.
+defined in the catalog, it prints out a message that an action will
+not be performed.
 
-If mode is set to `warning` then print out a list of resources that would
-have been added but don't add them to the catalog.
+If mode is set to `warning`, instead of adding resources to the catalog,
+it prints out a list of resources that would have been added.
 
 #### Parameters
 

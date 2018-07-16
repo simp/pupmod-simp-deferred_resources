@@ -1,4 +1,4 @@
-deferred_resources - This module creates custom types used to add resources to the catalog after the compilation of the manifests.  It should only be used i
+deferred_resources - This module creates custom types used to add resources to the catalog after the compilation of the manifests.
 
 Per Section 105 of the Copyright Act of 1976, these works are not entitled to
 domestic copyright protection under US Federal law.
