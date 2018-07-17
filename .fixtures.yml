@@ -1,0 +1,11 @@
+---
+fixtures:
+  repositories:
+    simplib:
+      repo: https://github.com/simp/pupmod-simp-simplib
+      ref: 3.10.0
+    stdlib:
+      repo: https://github.com/simp/puppetlabs-stdlib
+      ref: 4.13.1
+  symlinks:
+    deferred_resources: "#{source_dir}"

@@ -1,0 +1,4 @@
+* Thu Jul 05 2018 Jeanne Greulich <jeannegreulich@onyxpoint.com> - 0.1.0
+- This module supports adding lists of packages to the catalog after the all
+  the manifests have been compiled.  Its purpose is to support policy
+  enforcement for the SIMP project and is not meant for general purpose use.
