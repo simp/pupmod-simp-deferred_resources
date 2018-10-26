@@ -126,10 +126,12 @@ cache:
 .pe_2017_3: &pe_2017_3
   variables:
     PUPPET_VERSION: '~> 5.3.2'
+    BEAKER_PUPPET_COLLECTION: 'puppet5'
 
 .pe_2018_1: &pe_2018_1
   variables:
     PUPPET_VERSION: '~> 5.5.1'
+    BEAKER_PUPPET_COLLECTION: 'puppet5'
 
 .pup4_latest: &pup4_latest
   variables:
@@ -138,6 +140,7 @@ cache:
 .pup5_latest: &pup5_latest
   variables:
     PUPPET_VERSION: '~> 5.0'
+    BEAKER_PUPPET_COLLECTION: 'puppet5'
 
 
 #=======================================================================
@@ -303,6 +306,12 @@ el-pup5_5-default-fips:
     BEAKER_fips: 'yes'
   script:
     - 'bundle exec rake beaker:suites'
+
+oel-pup5_5-default:
+  <<: *acceptance_base
+  <<: *pe_2018_1
+  script:
+    - 'bundle exec rake beaker:suites[default,oel-combined-x64]'
 
 
 #=======================================================================
