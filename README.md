@@ -35,9 +35,8 @@ to install or remove that resource, as necessary.
 
 ### This is a SIMP module
 
-This module is a component of the [System Integrity Management
-Platform](https://github.com/NationalSecurityAgency/SIMP), a
-compliance-management framework built on Puppet.
+This module is a component of the [System Integrity Management Platform](https://simp-project.com),
+a compliance-management framework built on Puppet.
 
 If you find any issues, they may be submitted to our [bug
 tracker](https://simp-project.atlassian.net/).
