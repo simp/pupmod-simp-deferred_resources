@@ -1,3 +1,7 @@
+* Thu Mar 07 2019 Liz Nemsick <lnemsick.simp@gmail.com> - 0.1.1
+- Update the upper bound of stdlib to < 6.0.0
+- Update a URL in the README.md
+
 * Thu Jul 05 2018 Jeanne Greulich <jeannegreulich@onyxpoint.com> - 0.1.0
 - This module supports adding lists of packages to the catalog after the all
   the manifests have been compiled.  Its purpose is to support policy
