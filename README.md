@@ -94,7 +94,7 @@ supported operating systems, Puppet versions, and module dependencies.
 ## Development
 
 
-Please read our [Contribution Guide](http://simp-doc.readthedocs.io/en/stable/contributors_guide/index.html).
+Please read our [Contribution Guide](https://simpdoc.readthedocs.io/en/stable/contributors_guide/index.html).
 
 ### Acceptance tests
 
