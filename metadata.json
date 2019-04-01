@@ -1,11 +1,11 @@
 {
   "name": "simp-deferred_resources",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "author": "simp",
   "summary": "This module creates custom types used to add resources to the catalog after the compilation of the manifests",
   "license": "Apache-2.0",
-  "source": "https://github.com/",
-  "project_page": "https://github.com/",
+  "source": "https://github.com/simp/pupmod-simp-deferred_resources",
+  "project_page": "https://github.com/simp/pupmod-simp-deferred_resources",
   "issues_url": "https://simp-project.atlassian.net/",
   "tags": [
     "simp"
@@ -46,7 +46,7 @@
   "requirements": [
     {
       "name": "puppet",
-      "version_requirement": ">= 4.6.0 < 6.0.0"
+      "version_requirement": ">= 5.0.0 < 7.0.0"
     }
   ],
   "data_provider": "hiera"

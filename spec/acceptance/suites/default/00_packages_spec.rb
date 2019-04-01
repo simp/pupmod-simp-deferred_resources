@@ -1,14 +1,14 @@
 require 'spec_helper_acceptance'
 
-test_name 'deferred_resources class'
+test_name 'deferred package resources'
 
-describe 'deferred_resources class' do
+describe 'deferred package resources' do
   let(:manifest) {
     <<-EOS
       package { 'screen':      ensure => 'absent'}
       package { 'rsh-server':  ensure => 'installed'}
 
-      include 'deferred_resources::packages'
+      include 'deferred_resources'
     EOS
   }
   let(:hieradata) {
