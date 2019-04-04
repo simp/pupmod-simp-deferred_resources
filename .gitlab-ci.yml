@@ -5,7 +5,7 @@
 # https://puppet.com/docs/pe/2018.1/overview/getting_support_for_pe.html
 # ------------------------------------------------------------------------------
 # Release       Puppet   Ruby   EOL
-# SIMP 6.3      5.5.7    2.4.4  TBD***
+# SIMP 6.3      5.5.10    2.4.4  TBD***
 # PE 2018.1     5.5.8    2.4.4  2020-05 (LTS)***
 # PE 2019.0     6.0      2.5.1  2019-08-31^^^
 #
@@ -69,10 +69,10 @@ variables:
     BEAKER_PUPPET_COLLECTION: 'puppet5'
     MATRIX_RUBY_VERSION: '2.4'
 
-.pup_5_5_7: &pup_5_5_7
+.pup_5_5_10: &pup_5_5_10
   image: 'ruby:2.4'
   variables:
-    PUPPET_VERSION: '5.5.7'
+    PUPPET_VERSION: '5.5.10'
     BEAKER_PUPPET_COLLECTION: 'puppet5'
     MATRIX_RUBY_VERSION: '2.4'
 
@@ -150,8 +150,8 @@ pup5-unit:
   <<: *pup_5
   <<: *unit_tests
 
-pup5.5.7-unit:
-  <<: *pup_5_5_7
+pup5.5.10-unit:
+  <<: *pup_5_5_10
   <<: *unit_tests
 
 pup6-unit:
@@ -160,26 +160,26 @@ pup6-unit:
 
 # Acceptance tests
 # ==============================================================================
-pup5.5.7:
-  <<: *pup_5_5_7
+pup5.5.10:
+  <<: *pup_5_5_10
   <<: *acceptance_base
   script:
     - 'bundle exec rake beaker:suites'
 
-pup5.5.7-fips:
-  <<: *pup_5_5_7
+pup5.5.10-fips:
+  <<: *pup_5_5_10
   <<: *acceptance_base
   script:
     - 'BEAKER_fips=yes bundle exec rake beaker:suites'
 
-pup5.5.7-oel-combined-x64:
-  <<: *pup_5_5_7
+pup5.5.10-oel-combined-x64:
+  <<: *pup_5_5_10
   <<: *acceptance_base
   script:
     - 'bundle exec rake beaker:suites[default,oel-combined-x64]'
 
-pup5.5.7-oel-combined-x64-fips:
-  <<: *pup_5_5_7
+pup5.5.10-oel-combined-x64-fips:
+  <<: *pup_5_5_10
   <<: *acceptance_base
   <<: *only_with_SIMP_FULL_MATRIX
   script:
