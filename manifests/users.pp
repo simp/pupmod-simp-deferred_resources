@@ -7,20 +7,20 @@
 #
 # An exception will be raised if you list the same user in both lists.
 #
-# @param $remove
+# @param remove
 #   A list of users to remove.
 #
-# @param $install
+# @param install
 #   A list of users to install.
 #
 #   * A `Hash` can be used to add extra attributes for the user, but the
 #     `ensure` attribute will always be set to `absent` for removal and
 #     `present` for creation.
 #
-# @param $mode
+# @param mode
 #   @see `deferred_resources::mode`
 #
-# @param $log_level
+# @param log_level
 #   @see `deferred_resources::log_level`
 #
 class deferred_resources::users (

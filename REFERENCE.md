@@ -24,15 +24,23 @@ The deferred_resources class.
 
 The following parameters are available in the `deferred_resources` class.
 
-##### `$mode`
+##### `mode`
+
+Data type: `Enum['warning','enforcing']`
 
 If set to `enforcing` then the management classses will take action on the
 system. If set to 'warning' a message will be printed noting what would
 have taken place on the system but the catalog will not be updated.
 
-##### `$log_level`
+Default value: 'warning'
+
+##### `log_level`
+
+Data type: `Simplib::PuppetLogLevel`
 
 Set the log level for warning messages
+
+Default value: 'info'
 
 ##### `auto_include`
 
@@ -41,22 +49,6 @@ Data type: `Boolean`
 
 
 Default value: `true`
-
-##### `mode`
-
-Data type: `Enum['warning','enforcing']`
-
-
-
-Default value: 'warning'
-
-##### `log_level`
-
-Data type: `Simplib::PuppetLogLevel`
-
-
-
-Default value: 'info'
 
 ### deferred_resources::groups
 
@@ -73,31 +65,11 @@ An exception will be raised if you list the same group in both lists.
 
 The following parameters are available in the `deferred_resources::groups` class.
 
-##### `$remove`
-
-A list of groups to remove.
-
-##### `$install`
-
-A list of groups to install.
-
-* A `Hash` can be used to add extra attributes for the group, but the
-  `ensure` attribute will always be set to `absent` for removal and
-  `present` for creation.
-
-##### `$mode`
-
-@see `deferred_resources::mode`
-
-##### `$log_level`
-
-@see `deferred_resources::log_level`
-
 ##### `remove`
 
 Data type: `Variant[Array[String[1]]]`
 
-
+A list of groups to remove.
 
 Default value: []
 
@@ -105,7 +77,11 @@ Default value: []
 
 Data type: `Variant[Hash, Array[String[1]]]`
 
+A list of groups to install.
 
+* A `Hash` can be used to add extra attributes for the group, but the
+  `ensure` attribute will always be set to `absent` for removal and
+  `present` for creation.
 
 Default value: {}
 
@@ -113,7 +89,7 @@ Default value: {}
 
 Data type: `Enum['warning','enforcing']`
 
-
+@see `deferred_resources::mode`
 
 Default value: $deferred_resources::mode
 
@@ -121,7 +97,7 @@ Default value: $deferred_resources::mode
 
 Data type: `Simplib::PuppetLogLevel`
 
-
+@see `deferred_resources::log_level`
 
 Default value: $deferred_resources::log_level
 
@@ -139,48 +115,14 @@ An exception will be raised if you list the same package in both lists.
 
 The following parameters are available in the `deferred_resources::packages` class.
 
-##### `$remove`
+##### `remove`
+
+Data type: `Variant[Hash, Array]`
 
 A list of packages to remove.
 
 * A `Hash` can be used to add extra attributes for the package, but the
   `ensure` attribute will be overwritten if it is included.
-
-##### `$install`
-
-A list of packages to install.
-
-* A `Hash` can be used to add extra attributes for the package, but the
-  `ensure` attribute will always be set to `$package_ensure`.
-
-##### `$install_ensure`
-
-If installing, then this is the state that the packages should have.
-
-* This will be overridden by anything set in options applied to an entry in
-  the `$install` Hash.
-
-##### `$default_options`
-
-A `Hash` of options to apply to all packages (both remove and install.
-If ensure is entered in these options it will be overwritten.
-
-* These options may be anything that a Puppet `Package` resource can
-  normally accept.
-
-##### `$mode`
-
-@see `deferred_resources::mode`
-
-##### `$log_level`
-
-@see `deferred_resources::log_level`
-
-##### `remove`
-
-Data type: `Variant[Hash, Array]`
-
-
 
 Default value: {}
 
@@ -188,7 +130,10 @@ Default value: {}
 
 Data type: `Variant[Hash, Array]`
 
+A list of packages to install.
 
+* A `Hash` can be used to add extra attributes for the package, but the
+  `ensure` attribute will always be set to `$package_ensure`.
 
 Default value: {}
 
@@ -196,7 +141,10 @@ Default value: {}
 
 Data type: `Enum['latest','present','installed']`
 
+If installing, then this is the state that the packages should have.
 
+* This will be overridden by anything set in options applied to an entry in
+  the `$install` Hash.
 
 Default value: simplib::lookup('simp_options::package_ensure', { 'default_value' => 'installed' })
 
@@ -204,7 +152,11 @@ Default value: simplib::lookup('simp_options::package_ensure', { 'default_value'
 
 Data type: `Hash`
 
+A `Hash` of options to apply to all packages (both remove and install.
+If ensure is entered in these options it will be overwritten.
 
+* These options may be anything that a Puppet `Package` resource can
+  normally accept.
 
 Default value: {}
 
@@ -212,7 +164,7 @@ Default value: {}
 
 Data type: `Enum['warning','enforcing']`
 
-
+@see `deferred_resources::mode`
 
 Default value: $deferred_resources::mode
 
@@ -220,7 +172,7 @@ Default value: $deferred_resources::mode
 
 Data type: `Simplib::PuppetLogLevel`
 
-
+@see `deferred_resources::log_level`
 
 Default value: $deferred_resources::log_level
 
@@ -239,31 +191,11 @@ An exception will be raised if you list the same user in both lists.
 
 The following parameters are available in the `deferred_resources::users` class.
 
-##### `$remove`
-
-A list of users to remove.
-
-##### `$install`
-
-A list of users to install.
-
-* A `Hash` can be used to add extra attributes for the user, but the
-  `ensure` attribute will always be set to `absent` for removal and
-  `present` for creation.
-
-##### `$mode`
-
-@see `deferred_resources::mode`
-
-##### `$log_level`
-
-@see `deferred_resources::log_level`
-
 ##### `remove`
 
 Data type: `Variant[Array[String[1]]]`
 
-
+A list of users to remove.
 
 Default value: []
 
@@ -271,7 +203,11 @@ Default value: []
 
 Data type: `Variant[Hash, Array[String[1]]]`
 
+A list of users to install.
 
+* A `Hash` can be used to add extra attributes for the user, but the
+  `ensure` attribute will always be set to `absent` for removal and
+  `present` for creation.
 
 Default value: {}
 
@@ -279,7 +215,7 @@ Default value: {}
 
 Data type: `Enum['warning','enforcing']`
 
-
+@see `deferred_resources::mode`
 
 Default value: $deferred_resources::mode
 
@@ -287,7 +223,7 @@ Default value: $deferred_resources::mode
 
 Data type: `Simplib::PuppetLogLevel`
 
-
+@see `deferred_resources::log_level`
 
 Default value: $deferred_resources::log_level
 

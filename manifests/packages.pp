@@ -6,35 +6,35 @@
 #
 # An exception will be raised if you list the same package in both lists.
 #
-# @param $remove
+# @param remove
 #   A list of packages to remove.
 #
 #   * A `Hash` can be used to add extra attributes for the package, but the
 #     `ensure` attribute will be overwritten if it is included.
 #
-# @param $install
+# @param install
 #   A list of packages to install.
 #
 #   * A `Hash` can be used to add extra attributes for the package, but the
 #     `ensure` attribute will always be set to `$package_ensure`.
 #
-# @param $install_ensure
+# @param install_ensure
 #   If installing, then this is the state that the packages should have.
 #
 #   * This will be overridden by anything set in options applied to an entry in
 #     the `$install` Hash.
 #
-# @param $default_options
+# @param default_options
 #   A `Hash` of options to apply to all packages (both remove and install.
 #   If ensure is entered in these options it will be overwritten.
 #
 #   * These options may be anything that a Puppet `Package` resource can
 #     normally accept.
 #
-# @param $mode
+# @param mode
 #   @see `deferred_resources::mode`
 #
-# @param $log_level
+# @param log_level
 #   @see `deferred_resources::log_level`
 #
 class deferred_resources::packages (
