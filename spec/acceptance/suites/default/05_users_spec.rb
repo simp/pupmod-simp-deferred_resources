@@ -15,8 +15,8 @@ describe 'deferred user resources' do
     <<-EOD
 ---
 deferred_resources::users::remove:
-  'oh_the_humanity': ~
-  'pete': ~
+  - 'oh_the_humanity'
+  - 'pete'
 deferred_resources::users::install:
   - 'sad_panda'
   - 'hello_there'

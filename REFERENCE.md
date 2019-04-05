@@ -5,8 +5,10 @@
 
 **Classes**
 
-* [`deferred_resources`](#deferred_resources): **WARNING:** This module is intended to help meet common policy requirements for packages being either present or absent on a system and is n
+* [`deferred_resources`](#deferred_resources): 
+* [`deferred_resources::groups`](#deferred_resourcesgroups): This class takes two `Hashes` of group resources, one to remove, and one to install.  After the entire puppet catalog has been compiled, it w
 * [`deferred_resources::packages`](#deferred_resourcespackages): This class takes two `Hashes` of packages, one to remove and one to install.  After the entire puppet catalog has been compiled, it will proc
+* [`deferred_resources::users`](#deferred_resourcesusers): This class takes two `Hashes` of user resources, one to remove, and one to install.  After the entire puppet catalog has been compiled, it wi
 
 **Resource types**
 
@@ -16,10 +18,7 @@
 
 ### deferred_resources
 
-**WARNING:** This module is intended to help meet common policy requirements
-for packages being either present or absent on a system and is not meant for
-general usage. Make sure you understand the ramifications of what this module
-does to the Puppet catalog prior to using it outside of the SIMP framework.
+The deferred_resources class.
 
 #### Parameters
 
@@ -34,6 +33,14 @@ have taken place on the system but the catalog will not be updated.
 ##### `$log_level`
 
 Set the log level for warning messages
+
+##### `auto_include`
+
+Data type: `Boolean`
+
+
+
+Default value: `true`
 
 ##### `mode`
 
@@ -50,6 +57,73 @@ Data type: `Simplib::PuppetLogLevel`
 
 
 Default value: 'info'
+
+### deferred_resources::groups
+
+This class takes two `Hashes` of group resources, one to remove, and one to
+install.
+
+After the entire puppet catalog has been compiled, it will process both lists
+and, for any resource that is not already defined in the catalog, it will
+take the appropriate action.
+
+An exception will be raised if you list the same group in both lists.
+
+#### Parameters
+
+The following parameters are available in the `deferred_resources::groups` class.
+
+##### `$remove`
+
+A list of groups to remove.
+
+##### `$install`
+
+A list of groups to install.
+
+* A `Hash` can be used to add extra attributes for the group, but the
+  `ensure` attribute will always be set to `absent` for removal and
+  `present` for creation.
+
+##### `$mode`
+
+@see `deferred_resources::mode`
+
+##### `$log_level`
+
+@see `deferred_resources::log_level`
+
+##### `remove`
+
+Data type: `Variant[Array[String[1]]]`
+
+
+
+Default value: []
+
+##### `install`
+
+Data type: `Variant[Hash, Array[String[1]]]`
+
+
+
+Default value: {}
+
+##### `mode`
+
+Data type: `Enum['warning','enforcing']`
+
+
+
+Default value: $deferred_resources::mode
+
+##### `log_level`
+
+Data type: `Simplib::PuppetLogLevel`
+
+
+
+Default value: $deferred_resources::log_level
 
 ### deferred_resources::packages
 
@@ -129,6 +203,73 @@ Default value: simplib::lookup('simp_options::package_ensure', { 'default_value'
 ##### `default_options`
 
 Data type: `Hash`
+
+
+
+Default value: {}
+
+##### `mode`
+
+Data type: `Enum['warning','enforcing']`
+
+
+
+Default value: $deferred_resources::mode
+
+##### `log_level`
+
+Data type: `Simplib::PuppetLogLevel`
+
+
+
+Default value: $deferred_resources::log_level
+
+### deferred_resources::users
+
+This class takes two `Hashes` of user resources, one to remove, and one to
+install.
+
+After the entire puppet catalog has been compiled, it will process both lists
+and, for any resource that is not already defined in the catalog, it will
+take the appropriate action.
+
+An exception will be raised if you list the same user in both lists.
+
+#### Parameters
+
+The following parameters are available in the `deferred_resources::users` class.
+
+##### `$remove`
+
+A list of users to remove.
+
+##### `$install`
+
+A list of users to install.
+
+* A `Hash` can be used to add extra attributes for the user, but the
+  `ensure` attribute will always be set to `absent` for removal and
+  `present` for creation.
+
+##### `$mode`
+
+@see `deferred_resources::mode`
+
+##### `$log_level`
+
+@see `deferred_resources::log_level`
+
+##### `remove`
+
+Data type: `Variant[Array[String[1]]]`
+
+
+
+Default value: []
+
+##### `install`
+
+Data type: `Variant[Hash, Array[String[1]]]`
 
 
 

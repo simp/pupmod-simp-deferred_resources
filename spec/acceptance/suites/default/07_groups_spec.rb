@@ -15,8 +15,8 @@ describe 'deferred group resources' do
     <<-EOD
 ---
 deferred_resources::groups::remove:
-  'oh_the_humanity_group': ~
-  'pete_group': ~
+  - 'oh_the_humanity_group'
+  - 'pete_group'
 deferred_resources::groups::install:
   - 'sad_panda_group'
   - 'hello_there_group'
