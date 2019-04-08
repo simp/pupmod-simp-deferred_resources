@@ -1,5 +1,5 @@
-# This class takes two `Hashes` of user resources, one to remove, and one to
-# install.
+# This class takes an Array of user resources to remove, and a Hash of user
+# resources to install.
 #
 # After the entire puppet catalog has been compiled, it will process both lists
 # and, for any resource that is not already defined in the catalog, it will
