@@ -25,13 +25,17 @@
 This module provides capabilities to add resources to the puppet catalog
 **after** the initial compilation has been compiled.
 
-**WARNING:** This module is not recommended for use outside of the SIMP
-framework. It was developed for specific policy requirements from the DISA
-STIG, CIS Benchmark, etc... that require packages to either be installed or
-removed.  In order to not interfere with other manifests that might have
-legitimately added package resources, it first checks if each resource has
-already been included in the catalog and then adds the appropriate resource
-to install or remove that resource, as necessary.
+> **WARNING:**
+>
+> This module is not recommended for use outside of the SIMP
+> framework. It was developed for specific policy requirements from the DISA
+> STIG, CIS Benchmark, etc... that require resources to either be installed or
+> removed.  In order to not interfere with other manifests that might have
+> legitimately added resources, it first checks if each resource has already
+> been included in the catalog and then adds the appropriate resource to add or
+> remove that resource, as necessary.
+>
+> **WARNING:**
 
 ### This is a SIMP module
 
@@ -61,7 +65,7 @@ type for processing deferred resources.
 ### Example: Managing Packages
 
 ```
-  class { 'deferred_resources::package':
+  class { 'deferred_resources::packages':
     'remove'  => ['pkg1', 'pkg2'],
     'install' => ['pkg3', 'pkg4'],
     'mode'    => 'enforcing'
@@ -71,7 +75,7 @@ type for processing deferred resources.
 ### Example: Managing Packages but silencing messages
 
 ```
-  class { 'deferred_resources::package':
+  class { 'deferred_resources::packages':
     'remove'    => ['pkg1', 'pkg2'],
     'install'   => ['pkg3', 'pkg4'],
     'mode'      => 'enforcing',
