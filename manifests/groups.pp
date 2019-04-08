@@ -1,5 +1,5 @@
-# This class takes two `Hashes` of group resources, one to remove, and one to
-# install.
+# This class takes an Array of group resources to remove, and a Hash of group
+# resources to install.
 #
 # After the entire puppet catalog has been compiled, it will process both lists
 # and, for any resource that is not already defined in the catalog, it will
