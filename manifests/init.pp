@@ -29,5 +29,6 @@ class deferred_resources (
     include 'deferred_resources::packages'
     include 'deferred_resources::users'
     include 'deferred_resources::groups'
+    include 'deferred_resources::files'
   }
 }

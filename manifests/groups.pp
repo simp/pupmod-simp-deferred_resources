@@ -24,7 +24,7 @@
 #   @see `deferred_resources::log_level`
 #
 class deferred_resources::groups (
-  Variant[Array[String[1]]]       $remove    = [],
+  Array[String[1]]                $remove    = [],
   Variant[Hash, Array[String[1]]] $install   = {},
   Enum['warning','enforcing']     $mode      = $deferred_resources::mode,
   Simplib::PuppetLogLevel         $log_level = $deferred_resources::log_level

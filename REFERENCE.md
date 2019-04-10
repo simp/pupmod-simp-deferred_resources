@@ -6,13 +6,14 @@
 **Classes**
 
 * [`deferred_resources`](#deferred_resources): 
-* [`deferred_resources::groups`](#deferred_resourcesgroups): This class takes two `Hashes` of group resources, one to remove, and one to install.  After the entire puppet catalog has been compiled, it w
+* [`deferred_resources::files`](#deferred_resourcesfiles): This class takes an Array of file resources to remove, and a Hash of file resources to install.  After the entire puppet catalog has been com
+* [`deferred_resources::groups`](#deferred_resourcesgroups): This class takes an Array of group resources to remove, and a Hash of group resources to install.  After the entire puppet catalog has been c
 * [`deferred_resources::packages`](#deferred_resourcespackages): This class takes two `Hashes` of packages, one to remove and one to install.  After the entire puppet catalog has been compiled, it will proc
-* [`deferred_resources::users`](#deferred_resourcesusers): This class takes two `Hashes` of user resources, one to remove, and one to install.  After the entire puppet catalog has been compiled, it wi
+* [`deferred_resources::users`](#deferred_resourcesusers): This class takes an Array of user resources to remove, and a Hash of user resources to install.  After the entire puppet catalog has been com
 
 **Resource types**
 
-* [`deferred_resources`](#deferred_resources): WARNING: This type is **NOT** meant to be called directly. Please use the helper classes in the module.  This type will process after the cat
+* [`deferred_resources`](#deferred_resources): *** DANGER ***  THIS RESOURCE TYPE DOES THINGS THAT MAY BE CONFUSING MAKE SURE YOU FULLY UNDERSTAND HOW IT WORKS PRIOR TO USING IT  *** DANGE
 
 ## Classes
 
@@ -50,10 +51,79 @@ Data type: `Boolean`
 
 Default value: `true`
 
+### deferred_resources::files
+
+This class takes an Array of file resources to remove, and a Hash of file
+resources to install.
+
+After the entire puppet catalog has been compiled, it will process both lists
+and, for any resource that is not already defined in the catalog, it will
+take the appropriate action.
+
+An exception will be raised if you list the same file in both lists.
+
+#### Parameters
+
+The following parameters are available in the `deferred_resources::files` class.
+
+##### `remove`
+
+Data type: `Array[Stdlib::Absolutepath]`
+
+A list of files to remove.
+
+Default value: []
+
+##### `install`
+
+Data type: `Hash[Stdlib::Absolutepath, Hash]`
+
+A Hash of files to install.
+
+Default value: {}
+
+##### `update_existing_resources`
+
+Data type: `Boolean`
+
+**DANGEROUS** - READ CAREFULLY
+
+Update the following attributes of resources that already exist in the
+catalog if set in the `install` Hash:
+
+  * user
+  * group
+  * content
+    * Will unset `source`
+
+If you wish to affect additional parameters on an existing resource in the
+catalog, you should not use this class and should instead use a Resource
+Collector.
+
+@see https://puppet.com/docs/puppet/5.3/lang_resources_advanced.html#amending-attributes-with-a-collector
+
+Default value: `false`
+
+##### `mode`
+
+Data type: `Enum['warning','enforcing']`
+
+@see `deferred_resources::mode`
+
+Default value: $deferred_resources::mode
+
+##### `log_level`
+
+Data type: `Simplib::PuppetLogLevel`
+
+@see `deferred_resources::log_level`
+
+Default value: $deferred_resources::log_level
+
 ### deferred_resources::groups
 
-This class takes two `Hashes` of group resources, one to remove, and one to
-install.
+This class takes an Array of group resources to remove, and a Hash of group
+resources to install.
 
 After the entire puppet catalog has been compiled, it will process both lists
 and, for any resource that is not already defined in the catalog, it will
@@ -67,7 +137,7 @@ The following parameters are available in the `deferred_resources::groups` class
 
 ##### `remove`
 
-Data type: `Variant[Array[String[1]]]`
+Data type: `Array[String[1]]`
 
 A list of groups to remove.
 
@@ -178,8 +248,8 @@ Default value: $deferred_resources::log_level
 
 ### deferred_resources::users
 
-This class takes two `Hashes` of user resources, one to remove, and one to
-install.
+This class takes an Array of user resources to remove, and a Hash of user
+resources to install.
 
 After the entire puppet catalog has been compiled, it will process both lists
 and, for any resource that is not already defined in the catalog, it will
@@ -193,7 +263,7 @@ The following parameters are available in the `deferred_resources::users` class.
 
 ##### `remove`
 
-Data type: `Variant[Array[String[1]]]`
+Data type: `Array[String[1]]`
 
 A list of users to remove.
 
@@ -230,6 +300,13 @@ Default value: $deferred_resources::log_level
 ## Resource types
 
 ### deferred_resources
+
+*** DANGER ***
+
+THIS RESOURCE TYPE DOES THINGS THAT MAY BE CONFUSING MAKE SURE YOU FULLY
+UNDERSTAND HOW IT WORKS PRIOR TO USING IT
+
+*** DANGER ***
 
 WARNING: This type is **NOT** meant to be called directly. Please use the
 helper classes in the module.
@@ -268,6 +345,25 @@ The type of Puppet resource that will be passed in :resources
 ##### `resources`
 
 A Hash or Array of resources to add to the catalog.
+
+##### `override_existing_attributes`
+
+A Hash or Array of items that should be updated on existing attributes if
+they exist.
+
+ This is basically a controlled resource collector and absolutely must not
+ be taken lightly when used since it will affect existing resources in
+ your catalog.
+
+ If you want to be explicit, use a Resource Collector and do not set this.
+
+ If a Hash is passed, each key is the attribute that can be overridden and
+ an optional hash of options can be passed with the following meanings.
+
+   * 'invalidates':
+     * An Array of entries that this particular parameter invalidates.
+       This means that the items in the lisst will be set to `nil` in the
+       overridden resource.
 
 ##### `log_level`
 

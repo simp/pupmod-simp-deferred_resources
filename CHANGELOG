@@ -1,5 +1,9 @@
 * Mon Apr 01 2019 Trevor Vaughan <tvaughan@onyxpoint.com> - 0.2.0
-- Add deferred_resources::users and deferred_resources::groups
+- Add deferred_resources::users
+- Add deferred_resources::groups
+- Add deferred_resources::files
+- Add 'override_existing_attributes' capability to the 'deferred_resources'
+  native type
 - Drop Puppet 4 support
 - Add Puppet 6 support
 
