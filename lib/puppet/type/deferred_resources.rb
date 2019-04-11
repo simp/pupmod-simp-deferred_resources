@@ -100,7 +100,7 @@ Puppet::Type.newtype(:deferred_resources) do
 
         * 'invalidates':
           * An Array of entries that this particular parameter invalidates.
-            This means that the items in the lisst will be set to `nil` in the
+            This means that the items in the list will be set to `nil` in the
             overridden resource.
     EOM
 
