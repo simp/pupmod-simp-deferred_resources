@@ -127,17 +127,15 @@ Puppet::Type.newtype(:deferred_resources) do
 
       if value.is_a?(Hash)
         value.each_pair do |attr, opts|
-          if attr
-            if attr.is_a?(Hash)
-              invalid_control_opts = (attr.keys - valid_control_opts)
+          if opts && opts.is_a?(Hash)
+            invalid_control_opts = (opts.keys - valid_control_opts)
 
-              unless invalid_control_opts.empty?
-                raise Puppet::Error, %{Unknown control options '#{invalid_control_opts.join("', '")}' passed in the :override_existing_attributes Hash}
-              end
+            unless invalid_control_opts.empty?
+              raise Puppet::Error, %{Unknown control options '#{invalid_control_opts.join("', '")}' passed in the :override_existing_attributes Hash}
+            end
 
-              unless value['invalidates'].is_a?(Array)
-                raise Puppet::Error, "You must pass a list of attributes to override for '#{k}' in the :override_existing_attributes Hash"
-              end
+            unless opts['invalidates'].is_a?(Array)
+              raise Puppet::Error, "You must pass an Array of attributes to override for '#{attr}' in the :override_existing_attributes Hash"
             end
           end
         end

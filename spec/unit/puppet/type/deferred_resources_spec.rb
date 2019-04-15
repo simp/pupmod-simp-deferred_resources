@@ -278,6 +278,50 @@ describe deferred_resources_type do
           expect(result[:mode]).to eq('644')
           expect(result[:source]).to be_nil
         end
+
+        it 'should fail on an invalid override option' do
+          expect {
+            deferred_resources_type.new(
+              :name                         => 'foo',
+              :resource_type                => 'file',
+              :mode                         => 'enforcing',
+              :override_existing_attributes => {
+                'owner'   => nil,
+                'group'   => nil,
+                'content' => {
+                  'watermelons' => ['cheese']
+                }
+              },
+              :resources                    => {
+                '/tmp/test' => {
+                  'mode' => '0777'
+                }
+              }
+            )
+          }.to raise_error(/Unknown control options 'watermelons'/)
+        end
+
+        it 'should fail if not passed an Array of attributes to override' do
+          expect {
+            deferred_resources_type.new(
+              :name                         => 'foo',
+              :resource_type                => 'file',
+              :mode                         => 'enforcing',
+              :override_existing_attributes => {
+                'owner'   => nil,
+                'group'   => nil,
+                'content' => {
+                  'invalidates' => 'cheese'
+                }
+              },
+              :resources                    => {
+                '/tmp/test' => {
+                  'mode' => '0777'
+                }
+              }
+            )
+          }.to raise_error(/You must pass an Array of attributes to override for 'content'/)
+        end
       end
     end
 
