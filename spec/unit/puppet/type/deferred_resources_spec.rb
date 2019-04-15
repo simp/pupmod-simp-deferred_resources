@@ -279,6 +279,49 @@ describe deferred_resources_type do
           expect(result[:source]).to be_nil
         end
 
+        it 'should not remove attributes that are not present in the override resource' do
+          @resource = deferred_resources_type.new(
+            :name                         => 'foo',
+            :resource_type                => 'file',
+            :mode                         => 'enforcing',
+            :override_existing_attributes => {
+              'owner'   => nil,
+              'group'   => nil,
+              'content' => {
+                'invalidates' => ['source']
+              }
+            },
+            :resources                    => {
+              '/tmp/test' => {
+                'ensure'  => 'file',
+                'owner'   => 'bob',
+                'group'   => 'alice',
+                # This should be ignored
+                'mode'    => '0777'
+              }
+            }
+          )
+
+          @catalog.create_resource('File', {
+            'name'    => '/tmp/test',
+            'ensure'  => 'file',
+            'owner'   => 'root',
+            'group'   => 'root',
+            'source' => 'puppet:///my.server/test',
+            'mode'    => '0644'
+          })
+
+          @resource.autorequire
+
+          result = @catalog.resource('File[/tmp/test]')
+
+          expect(result[:owner]).to eq('bob')
+          expect(result[:group]).to eq('alice')
+          expect(result[:content]).to be_nil
+          expect(result[:mode]).to eq('644')
+          expect(result[:source]).to eq(['puppet:///my.server/test'])
+        end
+
         it 'should fail on an invalid override option' do
           expect {
             deferred_resources_type.new(

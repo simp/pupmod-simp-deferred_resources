@@ -196,21 +196,21 @@ Puppet::Type.newtype(:deferred_resources) do
             # Update the targeted list of attributes if they are present and
             # honor whatever options are passed
             self[:override_existing_attributes].each_pair do |attr, existing_resource_opts|
-              if existing_resource_opts['invalidates']
-                Array(existing_resource_opts['invalidates']).each do |to_invalidate|
-                  to_invalidate = to_invalidate.to_sym
+              if opts[attr.to_sym]
+                if existing_resource_opts['invalidates']
+                  Array(existing_resource_opts['invalidates']).each do |to_invalidate|
+                    to_invalidate = to_invalidate.to_sym
 
-                  Puppet.debug("deferred_resources: Invalidating attribute '#{to_invalidate}' on existing resource #{resource_log_name}")
+                    Puppet.debug("deferred_resources: Invalidating attribute '#{to_invalidate}' on existing resource #{resource_log_name}")
 
-                  if existing_resource.parameters.keys.include?(to_invalidate)
-                    existing_resource.delete(to_invalidate)
+                    if existing_resource.parameters.keys.include?(to_invalidate)
+                      existing_resource.delete(to_invalidate)
+                    end
                   end
                 end
-              end
 
-              Puppet.debug("deferred_resources: Setting value of '#{attr}' to '#{opts[attr]}' on existing resource #{resource_log_name}")
+                Puppet.debug("deferred_resources: Setting value of '#{attr}' to '#{opts[attr]}' on existing resource #{resource_log_name}")
 
-              if opts[attr.to_sym]
                 existing_resource[attr] = opts[attr.to_sym]
               end
             end
