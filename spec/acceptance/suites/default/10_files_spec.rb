@@ -8,6 +8,7 @@ describe 'deferred file resources' do
       file { '/tmp/rm_file2': ensure => 'file', content => 'Test RM' }
       file { '/tmp/add_file1': ensure => 'absent' }
       file { '/tmp/add_file3': ensure => 'file', content => 'Test Add', mode => '0600' }
+      file { '/tmp/add_file4': ensure => 'file', source => 'file:///tmp/source_data', mode => '0600' }
 
       include 'deferred_resources'
     EOS
@@ -39,6 +40,10 @@ deferred_resources::log_level: 'debug'
   '/tmp/add_file3':
     'mode': '0644'
     'content': 'Changed'
+  '/tmp/add_file4':
+    'mode': '0644'
+    'content': 'Changed'
+    'seltype': 'system_map_t'
 deferred_resources::mode: 'enforcing'
 deferred_resources::log_level: 'debug'
 deferred_resources::files::update_existing_resources: true
@@ -63,6 +68,7 @@ deferred_resources::files::update_existing_resources: true
 
       context 'with default parameters' do
         it 'should work with no errors' do
+          on(host, "echo \'junk\' > /tmp/source_data")
           apply_manifest_on(host, manifest, :catch_failures => true)
         end
 
@@ -123,6 +129,7 @@ deferred_resources::files::update_existing_resources: true
               expect(has_file?(host, file)).to eq true
           end
         end
+
       end
 
       context "with 'enforce' mode, 'debug' log_level, and files to ensure removed/installed" do
@@ -172,7 +179,7 @@ deferred_resources::files::update_existing_resources: true
         end
       end
 
-      context 'overriding exsiting resources' do
+      context 'overriding existing resources' do
         it 'should set up a clean state' do
           set_hieradata_on(host, hieradata)
         end
@@ -190,33 +197,55 @@ deferred_resources::files::update_existing_resources: true
             on(host, 'puppet resource file /tmp/add_file3 --to_yaml').output.strip
           )['file']['/tmp/add_file3']
 
+          orig_file_attrs2 = YAML.load(
+            on(host, 'puppet resource file /tmp/add_file4 --to_yaml').output.strip
+          )['file']['/tmp/add_file4']
+
+
           apply_manifest_on(host, manifest, :catch_failures => true)
 
           new_file_attrs = YAML.load(
             on(host, 'puppet resource file /tmp/add_file3 --to_yaml').output.strip
           )['file']['/tmp/add_file3']
 
+          new_file_attrs2 = YAML.load(
+            on(host, 'puppet resource file /tmp/add_file4 --to_yaml').output.strip
+          )['file']['/tmp/add_file4']
+
           # Remove things that will have changed
           ['mtime','ctime'].each do |attr|
             orig_file_attrs.delete(attr)
             new_file_attrs.delete(attr)
+            orig_file_attrs2.delete(attr)
+            new_file_attrs2.delete(attr)
           end
 
           expect(new_file_attrs['mode']).to eq('0644')
           expect(new_file_attrs['content']).to_not eq(orig_file_attrs['content'])
+          expect(new_file_attrs2.has_key?('source')).to be(false)
 
           # Remove the things we know changed
           ['mode','content'].each do |attr|
             orig_file_attrs.delete(attr)
             new_file_attrs.delete(attr)
+            orig_file_attrs2.delete(attr)
+            new_file_attrs2.delete(attr)
           end
 
           # Nothing else should have changed
           expect(orig_file_attrs).to eq(new_file_attrs)
+          # nothing else should have changed, even seltype because it is not
+          # in the override list.
+          expect(orig_file_attrs2).to eq(new_file_attrs2)
         end
 
         it 'should be idempotent' do
           apply_manifest_on(host, manifest, :catch_changes => true)
+        end
+
+        it 'should  have changed content' do
+          result = on(host,'cat /tmp/add_file4').stdout.strip
+          expect(result).to eq('Changed')
         end
       end
     end
