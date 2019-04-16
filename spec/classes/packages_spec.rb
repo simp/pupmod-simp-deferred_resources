@@ -14,7 +14,6 @@ describe 'deferred_resources::packages' do
   shared_examples_for "a structured module" do
     it { is_expected.to compile.with_all_deps }
     it { is_expected.to create_class('deferred_resources') }
-    it { is_expected.to contain_class('deferred_resources') }
   end
 
   context 'supported operating systems' do
