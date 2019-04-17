@@ -1,3 +1,12 @@
+* Mon Apr 01 2019 Trevor Vaughan <tvaughan@onyxpoint.com> - 0.2.0
+- Add deferred_resources::users
+- Add deferred_resources::groups
+- Add deferred_resources::files
+- Add 'override_existing_attributes' capability to the 'deferred_resources'
+  native type
+- Drop Puppet 4 support
+- Add Puppet 6 support
+
 * Thu Mar 07 2019 Liz Nemsick <lnemsick.simp@gmail.com> - 0.1.1
 - Update the upper bound of stdlib to < 6.0.0
 - Update a URL in the README.md

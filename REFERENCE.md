@@ -5,41 +5,33 @@
 
 **Classes**
 
-* [`deferred_resources`](#deferred_resources): **WARNING:** This module is intended to help meet common policy requirements for packages being either present or absent on a system and is n
+* [`deferred_resources`](#deferred_resources): 
+* [`deferred_resources::files`](#deferred_resourcesfiles): This class takes an Array of file resources to remove, and a Hash of file resources to install.  After the entire puppet catalog has been com
+* [`deferred_resources::groups`](#deferred_resourcesgroups): This class takes an Array of group resources to remove, and a Hash of group resources to install.  After the entire puppet catalog has been c
 * [`deferred_resources::packages`](#deferred_resourcespackages): This class takes two `Hashes` of packages, one to remove and one to install.  After the entire puppet catalog has been compiled, it will proc
+* [`deferred_resources::users`](#deferred_resourcesusers): This class takes an Array of user resources to remove, and a Hash of user resources to install.  After the entire puppet catalog has been com
 
 **Resource types**
 
-* [`deferred_resources`](#deferred_resources): WARNING: This type is **NOT** meant to be called directly. Please use the helper classes in the module.  This type will process after the cat
+* [`deferred_resources`](#deferred_resources): *** DANGER ***  THIS RESOURCE TYPE DOES THINGS THAT MAY BE CONFUSING MAKE SURE YOU FULLY UNDERSTAND HOW IT WORKS PRIOR TO USING IT  *** DANGE
 
 ## Classes
 
 ### deferred_resources
 
-**WARNING:** This module is intended to help meet common policy requirements
-for packages being either present or absent on a system and is not meant for
-general usage. Make sure you understand the ramifications of what this module
-does to the Puppet catalog prior to using it outside of the SIMP framework.
+The deferred_resources class.
 
 #### Parameters
 
 The following parameters are available in the `deferred_resources` class.
 
-##### `$mode`
-
-If set to `enforcing` then the management classses will take action on the
-system. If set to 'warning' a message will be printed noting what would
-have taken place on the system but the catalog will not be updated.
-
-##### `$log_level`
-
-Set the log level for warning messages
-
 ##### `mode`
 
 Data type: `Enum['warning','enforcing']`
 
-
+If set to `enforcing` then the management classses will take action on the
+system. If set to 'warning' a message will be printed noting what would
+have taken place on the system but the catalog will not be updated.
 
 Default value: 'warning'
 
@@ -47,9 +39,137 @@ Default value: 'warning'
 
 Data type: `Simplib::PuppetLogLevel`
 
-
+Set the log level for warning messages
 
 Default value: 'info'
+
+##### `auto_include`
+
+Data type: `Boolean`
+
+
+
+Default value: `true`
+
+### deferred_resources::files
+
+This class takes an Array of file resources to remove, and a Hash of file
+resources to install.
+
+After the entire puppet catalog has been compiled, it will process both lists
+and, for any resource that is not already defined in the catalog, it will
+take the appropriate action.
+
+An exception will be raised if you list the same file in both lists.
+
+#### Parameters
+
+The following parameters are available in the `deferred_resources::files` class.
+
+##### `remove`
+
+Data type: `Array[Stdlib::Absolutepath]`
+
+A list of files to remove.
+
+Default value: []
+
+##### `install`
+
+Data type: `Hash[Stdlib::Absolutepath, Hash]`
+
+A Hash of files to install.
+
+Default value: {}
+
+##### `update_existing_resources`
+
+Data type: `Boolean`
+
+**DANGEROUS** - READ CAREFULLY
+
+Update the following attributes of resources that already exist in the
+catalog if set in the `install` Hash:
+
+  * user
+  * group
+  * content
+    * Will unset `source`
+
+If you wish to affect additional parameters on an existing resource in the
+catalog, you should not use this class and should instead use a Resource
+Collector.
+
+@see https://puppet.com/docs/puppet/5.3/lang_resources_advanced.html#amending-attributes-with-a-collector
+
+Default value: `false`
+
+##### `mode`
+
+Data type: `Enum['warning','enforcing']`
+
+@see `deferred_resources::mode`
+
+Default value: $deferred_resources::mode
+
+##### `log_level`
+
+Data type: `Simplib::PuppetLogLevel`
+
+@see `deferred_resources::log_level`
+
+Default value: $deferred_resources::log_level
+
+### deferred_resources::groups
+
+This class takes an Array of group resources to remove, and a Hash of group
+resources to install.
+
+After the entire puppet catalog has been compiled, it will process both lists
+and, for any resource that is not already defined in the catalog, it will
+take the appropriate action.
+
+An exception will be raised if you list the same group in both lists.
+
+#### Parameters
+
+The following parameters are available in the `deferred_resources::groups` class.
+
+##### `remove`
+
+Data type: `Array[String[1]]`
+
+A list of groups to remove.
+
+Default value: []
+
+##### `install`
+
+Data type: `Variant[Hash, Array[String[1]]]`
+
+A list of groups to install.
+
+* A `Hash` can be used to add extra attributes for the group, but the
+  `ensure` attribute will always be set to `absent` for removal and
+  `present` for creation.
+
+Default value: {}
+
+##### `mode`
+
+Data type: `Enum['warning','enforcing']`
+
+@see `deferred_resources::mode`
+
+Default value: $deferred_resources::mode
+
+##### `log_level`
+
+Data type: `Simplib::PuppetLogLevel`
+
+@see `deferred_resources::log_level`
+
+Default value: $deferred_resources::log_level
 
 ### deferred_resources::packages
 
@@ -65,48 +185,14 @@ An exception will be raised if you list the same package in both lists.
 
 The following parameters are available in the `deferred_resources::packages` class.
 
-##### `$remove`
+##### `remove`
+
+Data type: `Variant[Hash, Array]`
 
 A list of packages to remove.
 
 * A `Hash` can be used to add extra attributes for the package, but the
   `ensure` attribute will be overwritten if it is included.
-
-##### `$install`
-
-A list of packages to install.
-
-* A `Hash` can be used to add extra attributes for the package, but the
-  `ensure` attribute will always be set to `$package_ensure`.
-
-##### `$install_ensure`
-
-If installing, then this is the state that the packages should have.
-
-* This will be overridden by anything set in options applied to an entry in
-  the `$install` Hash.
-
-##### `$default_options`
-
-A `Hash` of options to apply to all packages (both remove and install.
-If ensure is entered in these options it will be overwritten.
-
-* These options may be anything that a Puppet `Package` resource can
-  normally accept.
-
-##### `$mode`
-
-@see `deferred_resources::mode`
-
-##### `$log_level`
-
-@see `deferred_resources::log_level`
-
-##### `remove`
-
-Data type: `Variant[Hash, Array]`
-
-
 
 Default value: {}
 
@@ -114,7 +200,10 @@ Default value: {}
 
 Data type: `Variant[Hash, Array]`
 
+A list of packages to install.
 
+* A `Hash` can be used to add extra attributes for the package, but the
+  `ensure` attribute will always be set to `$package_ensure`.
 
 Default value: {}
 
@@ -122,7 +211,10 @@ Default value: {}
 
 Data type: `Enum['latest','present','installed']`
 
+If installing, then this is the state that the packages should have.
 
+* This will be overridden by anything set in options applied to an entry in
+  the `$install` Hash.
 
 Default value: simplib::lookup('simp_options::package_ensure', { 'default_value' => 'installed' })
 
@@ -130,7 +222,11 @@ Default value: simplib::lookup('simp_options::package_ensure', { 'default_value'
 
 Data type: `Hash`
 
+A `Hash` of options to apply to all packages (both remove and install.
+If ensure is entered in these options it will be overwritten.
 
+* These options may be anything that a Puppet `Package` resource can
+  normally accept.
 
 Default value: {}
 
@@ -138,7 +234,7 @@ Default value: {}
 
 Data type: `Enum['warning','enforcing']`
 
-
+@see `deferred_resources::mode`
 
 Default value: $deferred_resources::mode
 
@@ -146,13 +242,71 @@ Default value: $deferred_resources::mode
 
 Data type: `Simplib::PuppetLogLevel`
 
+@see `deferred_resources::log_level`
 
+Default value: $deferred_resources::log_level
+
+### deferred_resources::users
+
+This class takes an Array of user resources to remove, and a Hash of user
+resources to install.
+
+After the entire puppet catalog has been compiled, it will process both lists
+and, for any resource that is not already defined in the catalog, it will
+take the appropriate action.
+
+An exception will be raised if you list the same user in both lists.
+
+#### Parameters
+
+The following parameters are available in the `deferred_resources::users` class.
+
+##### `remove`
+
+Data type: `Array[String[1]]`
+
+A list of users to remove.
+
+Default value: []
+
+##### `install`
+
+Data type: `Variant[Hash, Array[String[1]]]`
+
+A list of users to install.
+
+* A `Hash` can be used to add extra attributes for the user, but the
+  `ensure` attribute will always be set to `absent` for removal and
+  `present` for creation.
+
+Default value: {}
+
+##### `mode`
+
+Data type: `Enum['warning','enforcing']`
+
+@see `deferred_resources::mode`
+
+Default value: $deferred_resources::mode
+
+##### `log_level`
+
+Data type: `Simplib::PuppetLogLevel`
+
+@see `deferred_resources::log_level`
 
 Default value: $deferred_resources::log_level
 
 ## Resource types
 
 ### deferred_resources
+
+*** DANGER ***
+
+THIS RESOURCE TYPE DOES THINGS THAT MAY BE CONFUSING MAKE SURE YOU FULLY
+UNDERSTAND HOW IT WORKS PRIOR TO USING IT
+
+*** DANGER ***
 
 WARNING: This type is **NOT** meant to be called directly. Please use the
 helper classes in the module.
@@ -191,6 +345,25 @@ The type of Puppet resource that will be passed in :resources
 ##### `resources`
 
 A Hash or Array of resources to add to the catalog.
+
+##### `override_existing_attributes`
+
+A Hash or Array of items that should be updated on existing attributes if
+they exist.
+
+ This is basically a controlled resource collector and absolutely must not
+ be taken lightly when used since it will affect existing resources in
+ your catalog.
+
+ If you want to be explicit, use a Resource Collector and do not set this.
+
+ If a Hash is passed, each key is the attribute that can be overridden and
+ an optional hash of options can be passed with the following meanings.
+
+   * 'invalidates':
+     * An Array of entries that this particular parameter invalidates.
+       This means that the items in the lisst will be set to `nil` in the
+       overridden resource.
 
 ##### `log_level`
 

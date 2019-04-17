@@ -1,16 +1,15 @@
 require 'spec_helper'
 
-package_array = [
-  'pkg1',
-  'pkg2'
+group_array = [
+  'group1',
+  'group2'
 ]
 
-package_hash = {
-  'pkg3' => {'install_options' => 'stuff'},
-  'pkg4' => {}
+group_hash = {
+  'group3' => {}
 }
 
-describe 'deferred_resources::packages' do
+describe 'deferred_resources::groups' do
   shared_examples_for "a structured module" do
     it { is_expected.to compile.with_all_deps }
     it { is_expected.to create_class('deferred_resources') }
@@ -26,17 +25,16 @@ describe 'deferred_resources::packages' do
         context "deferred_resources class without any parameters" do
           let(:params) {{ }}
           it_behaves_like "a structured module"
-          it { is_expected.to_not contain_deferred_resources('deferred_resources Package remove')}
-          it { is_expected.to_not contain_deferred_resources('deferred_resources Package install')}
+          it { is_expected.to_not contain_deferred_resources('deferred_resources Group remove')}
+          it { is_expected.to_not contain_deferred_resources('deferred_resources Group install')}
         end
 
         context "with parameters set" do
           let(:params) {{
-            'remove'         => package_array,
-            'install'        => package_hash,
-            'install_ensure' => 'present',
-            'mode'           => 'enforcing',
-            'log_level'      => 'debug'
+            'remove'    => group_array,
+            'install'   => group_hash,
+            'mode'      => 'enforcing',
+            'log_level' => 'debug'
           }}
 
           let(:install_hash){
@@ -49,19 +47,19 @@ describe 'deferred_resources::packages' do
 
           it { is_expected.to compile.with_all_deps }
 
-          it { is_expected.to contain_deferred_resources('deferred_resources Package remove').with({
-            'resource_type'   => 'package',
+          it { is_expected.to contain_deferred_resources('deferred_resources Group remove').with({
+            'resource_type'   => 'group',
             'resources'       => params['remove'],
             'mode'            => params['mode'],
             'default_options' => { 'ensure' => 'absent' },
             'log_level'       => params['log_level']
           })}
 
-          it { is_expected.to contain_deferred_resources('deferred_resources Package install').with({
-            'resource_type'   => 'package',
+          it { is_expected.to contain_deferred_resources('deferred_resources Group install').with({
+            'resource_type'   => 'group',
             'resources'       => install_hash,
             'mode'            => params['mode'],
-            'default_options' => { 'ensure' => params['install_ensure'] },
+            'default_options' => { 'ensure' => 'present' },
             'log_level'       => params['log_level']
           })}
         end

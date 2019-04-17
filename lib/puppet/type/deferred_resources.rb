@@ -1,5 +1,12 @@
 Puppet::Type.newtype(:deferred_resources) do
   @doc = <<-EOM
+      *** DANGER ***
+
+      THIS RESOURCE TYPE DOES THINGS THAT MAY BE CONFUSING MAKE SURE YOU FULLY
+      UNDERSTAND HOW IT WORKS PRIOR TO USING IT
+
+      *** DANGER ***
+
       WARNING: This type is **NOT** meant to be called directly. Please use the
       helper classes in the module.
 
@@ -30,7 +37,7 @@ Puppet::Type.newtype(:deferred_resources) do
 
     validate do |value|
       unless   value.is_a?(Hash)
-        raise 'Expecting a Hash for :default_options'
+        raise Puppet::Error, 'Expecting a Hash for :default_options'
       end
     end
   end
@@ -72,7 +79,66 @@ Puppet::Type.newtype(:deferred_resources) do
 
     validate do |value|
       unless  value.is_a?(Hash) || value.is_a?(Array)
-        raise 'Expecting a Hash or Array for :resources'
+        raise Puppet::Error, 'Expecting a Hash or Array for :resources'
+      end
+    end
+  end
+
+  newparam(:override_existing_attributes) do
+    desc <<-EOM
+     A Hash or Array of items that should be updated on existing attributes if
+     they exist.
+
+      This is basically a controlled resource collector and absolutely must not
+      be taken lightly when used since it will affect existing resources in
+      your catalog.
+
+      If you want to be explicit, use a Resource Collector and do not set this.
+
+      If a Hash is passed, each key is the attribute that can be overridden and
+      an optional hash of options can be passed with the following meanings.
+
+        * 'invalidates':
+          * An Array of entries that this particular parameter invalidates.
+            This means that the items in the list will be set to `nil` in the
+            overridden resource.
+    EOM
+
+    munge do |value|
+      if value.is_a?(Array)
+        value = Hash[value.map{|x| [x, {}]}]
+      end
+
+      value.keys.each do |k|
+        value[k] = {} if value[k].nil?
+      end
+
+      value
+    end
+
+    validate do |value|
+      unless (value.is_a?(Hash) || value.is_a?(Array)) && !value.empty?
+        raise Puppet::Error, 'Expecting an Array or Hash with contents for :override_existing_attributes'
+      end
+
+      valid_control_opts = [
+        'invalidates'
+      ]
+
+      if value.is_a?(Hash)
+        value.each_pair do |attr, opts|
+          if opts && opts.is_a?(Hash)
+            invalid_control_opts = (opts.keys - valid_control_opts)
+
+            unless invalid_control_opts.empty?
+              raise Puppet::Error, %{Unknown control options '#{invalid_control_opts.join("', '")}' passed in the :override_existing_attributes Hash}
+            end
+
+            unless opts['invalidates'].is_a?(Array)
+              raise Puppet::Error, "You must pass an Array of attributes to override for '#{attr}' in the :override_existing_attributes Hash"
+            end
+          end
+        end
       end
     end
   end
@@ -112,18 +178,48 @@ Puppet::Type.newtype(:deferred_resources) do
     # Go through the provided resources, check if a resource exists.
     # Create the resource or print message as appropriate
     self[:resources].each do |rname, opts|
-      # Symbolize the keys after merging for comparison later
+      # Symbolize the keys after merging for direct comparison later
       opts = self[:default_options].merge(opts).inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
 
+      # Get the easily searchable name
       resource_type = self[:resource_type].to_s.capitalize
+
+      # Directly pull the existing resource if it exists
       existing_resource = catalog.resource(resource_type, rname)
 
+      # A user-friendly name for the resource to add to the logs
       resource_log_name = "#{resource_type}[#{rname}]"
 
       if existing_resource
-        # If the options are different we need to let the user know since that
-        # is a potential policy violation.
-        if (Array(opts) - Array(existing_resource.to_hash)).empty?
+        if self[:override_existing_attributes]
+          if self[:mode] == :enforcing
+            # Update the targeted list of attributes if they are present and
+            # honor whatever options are passed
+            self[:override_existing_attributes].each_pair do |attr, existing_resource_opts|
+              if opts[attr.to_sym]
+                if existing_resource_opts['invalidates']
+                  Array(existing_resource_opts['invalidates']).each do |to_invalidate|
+                    to_invalidate = to_invalidate.to_sym
+
+                    Puppet.debug("deferred_resources: Invalidating attribute '#{to_invalidate}' on existing resource #{resource_log_name}")
+
+                    if existing_resource.parameters.keys.include?(to_invalidate)
+                      existing_resource.delete(to_invalidate)
+                    end
+                  end
+                end
+
+                Puppet.debug("deferred_resources: Setting value of '#{attr}' to '#{opts[attr]}' on existing resource #{resource_log_name}")
+
+                existing_resource[attr] = opts[attr.to_sym]
+              end
+            end
+          else
+            Puppet.send(self[:log_level], %{deferred_resources: Would have overridden attributes '#{self[:override_existing_attributes].keys.join("', '")}' on existing resource #{resource_log_name}})
+          end
+        elsif (Array(opts) - Array(existing_resource.to_hash)).empty?
+          # If the options are different we need to let the user know since
+          # that is a potential policy violation.
           Puppet.debug("deferred_resources: Ignoring existing resource #{resource_log_name}")
         else
           Puppet.send(self[:log_level], "deferred_resources: Existing resource '#{resource_log_name}' at '#{existing_resource.file}:#{existing_resource.line}' has options that differ from deferred_resources::<x> parameters")
