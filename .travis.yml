@@ -5,9 +5,8 @@
 # https://puppet.com/docs/pe/2018.1/overview/getting_support_for_pe.html
 # ------------------------------------------------------------------------------
 # Release       Puppet   Ruby   EOL
-# PE 2017.3     5.3      2.4.5  2018-12-31
-# SIMP 6.3      5.5      2.4.5  TBD***
-# PE 2018.1     5.5      2.4.5  2020-05 (LTS)***
+# SIMP 6.3      5.5.10   2.4.5  TBD***
+# PE 2018.1.7   5.5.10   2.4.5  2020-05 (LTS)***
 # PE 2019.0     6.0      2.5.1  2019-08-31^^^
 #
 # *** = Modules created for SIMP 6.3+ are not required to support Puppet < 5.5
@@ -35,7 +34,7 @@ addons:
 
 before_install:
   - rm -f Gemfile.lock
-  - gem install -v '~> 1.16' bundler
+  - gem install -v '~> 1.17' bundler
 
 global:
   - STRICT_VARIABLES=yes
@@ -57,32 +56,18 @@ jobs:
         - bundle exec puppet module build
 
     - stage: spec
-      name: 'Puppet 5.3 (PE 2017.3)'
       rvm: 2.4.5
-      env: PUPPET_VERSION="~> 5.3.0"
+      name: 'Puppet 5.5.10 (SIMP 6.3, PE 2018.1)'
+      env: PUPPET_VERSION="5.5.10"
       script:
-        - bundle exec rake spec
-
-    - stage: spec
-      rvm: 2.4.5
-      name: 'Puppet 5.5 (SIMP 6.3, PE 2018.1)'
-      env: PUPPET_VERSION="~> 5.5.0"
-      script:
-        - bundle exec rake spec
-
-    - stage: spec
-      name: 'Latest Puppet 5.x'
-      rvm: 2.4.5
-      env: PUPPET_VERSION="~> 5.0"
-      script:
-        - bundle exec rake spec
+        - bundle exec rake spec_parallel
 
     - stage: spec
       name: 'Latest Puppet 6.x'
       rvm: 2.5.1
-      env: PUPPET_VERSION="~> 6.0"
+      env: PUPPET_VERSION="~> 6"
       script:
-        - bundle exec rake spec
+        - bundle exec rake spec_parallel
 
     # Uncomment the following for deployment tasks and set 'secure' in both
     # sections appropriately
@@ -96,7 +81,7 @@ jobs:
       deploy:
         - provider: releases
           api_key:
-            secure: "Vuznj8D4wS292lNijhLOySUlgWCeY0YszusJgzrxxAJhTk2R+oYReZZ8gbeJNCP6XCLOSI/pRwI17c+0T2gKl9HgojKDoG5NzvfiMfhS2aUW0wS8pWg8GTyF/TQ1CRvwOVYif1nSjMoP6C1/2Kg+aXyiESnA6b6t9HcdqOnxJ8Cn/rKeZGAzHR1iprgIYMYi2ubh988oDGJPXafYUQz6gNNvE6ex16KZ4+U+R1d0vg58FniJe47GQfZ0FtSlYIB6aWKOvdeng9VoYnuDoVDVpXHnKNX/MLlFfIDLoAJDNBVFDu8ug5/jtiiwBOfHonqJVXEbKH8ghWyWeHtiKE//42NaPDGMHyJrEEaOxZJMXIO6WLIGyc0YtOKBUiyrbhIgUtb7KhJVYpl1dGyJVhd4SQbMTCCxrvzGc1xEb+haMse+vwjA0LdTEjB0T/zOUEoqkRV6kRxGsQ2Sv503/drCAuqjz/9xn9Pz7mZXAvwwoCQFiYnrONh4Q1/+wzUUN5GersHLrc2wO2aLoeWUFxoXkrF8mAdUjS/wY4fTYe+Oy/xdaU+FFA2tOHIOK5vRzgrz4N2YJhCrv1cRGuRjv6H0nSqMkXa4czGk4e7Mb/WPqXcktCXE4OStmOGodjbqVD5sLmRTK3T0Xf7Y3PxjwO60G0Pgk+rHW8sQCpst1ppwWvc="
+            secure: "CHANGE_SECURE"
           skip_cleanup: true
           on:
             tags: true
@@ -104,7 +89,7 @@ jobs:
         - provider: puppetforge
           user: simp
           password:
-            secure: "LBDTOMXMbZww1a7llqxMrk9kMk4jqIs5xzDDuv11qn1xs+BF1rie/w7sL48erlFSiJG+QPSrKn0Rq/bXJ9V/7zxudxuxtS14QhHSUsQciTvpN0g5fovo+QV+knGMg0ejXeHA3+jytHNtG15V3vnxotsIeX492y/GrwDoO4pMDi7vbECY9XG/1D/+J8zsDrG6Ml5PN5aPJgsA09ZyQ5Xm1+c7tgjGRH8z+aJSuPHMwmHKUAXCZEQrsGsWWblNNCYC1hgJviRSqAzOtznXIHfWpEJfp9MsD7ThyBKkdQlviqvbTkIshJtg8HRT0soQRODADhzaXmy2Rc8iABYcagnqLSiXg/Cn4fd//aoqOH3ZV/KJBo2bnI3Py8mHOzbJGTgZ+edV8VBLh6MCSBphdTf9yDdEQiitKElfq8x4btt8yoloyVFfnzGg9tuvozpB7EYsvPZGZzzWoJSdvNv3sS04ZyluD4WMcFG3/N3JruQxarCx3ddpHoriaAJJbKyF3k8LRBNK6VveErINUVtk4kw5mCBNpJ5Zn/32XjpWDblhtkejnfA/bdZElHw6g5prLQRdv9uQECMnJEfCibuVdDCELfmJGQlCAw9eJxcLx3vh0WKa9SOQQMNUwKThhX7zD+BYx3Wr9jp1/M+qGdVfyindmZxyKnVYOry+UoHbxElG1Hg="
+            secure: "CHANGE_PASSWORD"
           on:
             tags: true
             condition: '($SKIP_FORGE_PUBLISH != true)'
