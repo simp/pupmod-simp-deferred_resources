@@ -1,0 +1,34 @@
+---
+lookup_options:
+  deferred_resources::files::remove:
+    merge:
+      strategy: deep
+  deferred_resources::files::install:
+    merge:
+      strategy: deep
+      knockout_prefix: --
+  deferred_resources::groups::remove:
+    merge:
+      strategy: deep
+  deferred_resources::groups::install:
+    merge:
+      strategy: deep
+      knockout_prefix: --
+  deferred_resources::packages::remove:
+    merge:
+      strategy: deep
+  deferred_resources::packages::install:
+    merge:
+      strategy: deep
+      knockout_prefix: --
+  deferred_resources::packages::default_options:
+    merge:
+      strategy: deep
+      knockout_prefix: --
+  deferred_resources::users::remove:
+    merge:
+      strategy: deep
+  deferred_resources::users::install:
+    merge:
+      strategy: deep
+      knockout_prefix: --
