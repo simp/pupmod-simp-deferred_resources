@@ -1,3 +1,6 @@
+* Tue Jul 23 2019 Liz Nemsick <lnemsick.simp@gmail.com> - 0.2.2
+- Remove unnecessary ``data_provider`` key in the metadata.json file.
+
 * Mon Jun 17 2019 Trevor Vaughan <tvaughan@onyxpoint.com> - 0.2.1
 - Define deep merge strategies for the Hash and Array class arguments.
 
