@@ -12,6 +12,12 @@
 #   * A `Hash` can be used to add extra attributes for the package, but the
 #     `ensure` attribute will be overwritten if it is included.
 #
+# @param remove_ensure
+#   If removing, then this is the state that the packages should have.
+#
+#   * This will be overridden by anything set in options applied to an entry in
+#     the `$remove` Hash.
+#
 # @param install
 #   A list of packages to install.
 #
@@ -39,6 +45,7 @@
 #
 class deferred_resources::packages (
   Variant[Hash, Array]                 $remove          = {},
+  Enum['absent','purged']              $remove_ensure   = 'absent',
   Variant[Hash, Array]                 $install         = {},
   Enum['latest','present','installed'] $install_ensure  = simplib::lookup('simp_options::package_ensure', { 'default_value' => 'installed' }),
   Hash                                 $default_options = {},
@@ -51,7 +58,7 @@ class deferred_resources::packages (
     deferred_resources{ "${module_name} Package remove":
       resources       => $remove,
       resource_type   => 'package',
-      default_options => $default_options + { 'ensure' => 'absent' },
+      default_options => $default_options + { 'ensure' => $remove_ensure },
       mode            => $mode,
       log_level       => $log_level
     }

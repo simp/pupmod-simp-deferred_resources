@@ -33,6 +33,7 @@ describe 'deferred_resources::packages' do
         context "with parameters set" do
           let(:params) {{
             'remove'         => package_array,
+            'remove_ensure'  => 'purged',
             'install'        => package_hash,
             'install_ensure' => 'present',
             'mode'           => 'enforcing',
@@ -53,7 +54,7 @@ describe 'deferred_resources::packages' do
             'resource_type'   => 'package',
             'resources'       => params['remove'],
             'mode'            => params['mode'],
-            'default_options' => { 'ensure' => 'absent' },
+            'default_options' => { 'ensure' => params['remove_ensure'] },
             'log_level'       => params['log_level']
           })}
 
