@@ -32,19 +32,6 @@ deferred_resources::log_level: 'debug'
 
   hosts.each do |host|
     context "on #{host}" do
-      def has_user?(host, user)
-        res_info = YAML.safe_load(on(host, %(puppet resource user #{user} --to_yaml)).output)
-        if res_info
-          if res_info['user']
-            if res_info['user'][user]
-              return res_info['user'][user]['ensure'] == 'present'
-            end
-          end
-        end
-
-        return false
-      end
-
       def create_user(host, user)
         on(host, %(puppet resource user #{user} ensure=present))
       end

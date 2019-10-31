@@ -32,19 +32,6 @@ deferred_resources::log_level: 'debug'
 
   hosts.each do |host|
     context "on #{host}" do
-      def has_group?(host, group)
-        res_info = YAML.safe_load(on(host, %(puppet resource group #{group} --to_yaml)).output)
-        if res_info
-          if res_info['group']
-            if res_info['group'][group]
-              return res_info['group'][group]['ensure'] == 'present'
-            end
-          end
-        end
-
-        return false
-      end
-
       def create_group(host, group)
         on(host, %(puppet resource group #{group} ensure=present))
       end

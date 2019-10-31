@@ -52,20 +52,6 @@ deferred_resources::files::update_existing_resources: true
 
   hosts.each do |host|
     context "on #{host}" do
-      def has_file?(host, file)
-        res_info = YAML.safe_load(on(host, %(puppet resource file #{file} --to_yaml)).output)
-
-        if res_info
-          if res_info['file']
-            if res_info['file'][file]
-              return res_info['file'][file]['ensure'] == 'file'
-            end
-          end
-        end
-
-        return false
-      end
-
       context 'with default parameters' do
         it 'should work with no errors' do
           on(host, "echo \'junk\' > /tmp/source_data")
@@ -171,8 +157,8 @@ deferred_resources::files::update_existing_resources: true
         end
 
         it 'should not have overridden file attributes' do
-          file_attrs = YAML.load(
-            on(host, 'puppet resource file /tmp/add_file2 --to_yaml').output.strip
+          file_attrs = YAML.safe_load(
+            on(host, 'puppet resource file /tmp/add_file2 --to_yaml').stdout.strip
           )['file']['/tmp/add_file2']
 
           expect(file_attrs['mode']).to eq('0600')
@@ -193,23 +179,23 @@ deferred_resources::files::update_existing_resources: true
         end
 
         it 'should override selected parameters' do
-          orig_file_attrs = YAML.load(
-            on(host, 'puppet resource file /tmp/add_file3 --to_yaml').output.strip
+          orig_file_attrs = YAML.safe_load(
+            on(host, 'puppet resource file /tmp/add_file3 --to_yaml').stdout.strip
           )['file']['/tmp/add_file3']
 
-          orig_file_attrs2 = YAML.load(
-            on(host, 'puppet resource file /tmp/add_file4 --to_yaml').output.strip
+          orig_file_attrs2 = YAML.safe_load(
+            on(host, 'puppet resource file /tmp/add_file4 --to_yaml').stdout.strip
           )['file']['/tmp/add_file4']
 
 
           apply_manifest_on(host, manifest, :catch_failures => true)
 
-          new_file_attrs = YAML.load(
-            on(host, 'puppet resource file /tmp/add_file3 --to_yaml').output.strip
+          new_file_attrs = YAML.safe_load(
+            on(host, 'puppet resource file /tmp/add_file3 --to_yaml').stdout.strip
           )['file']['/tmp/add_file3']
 
-          new_file_attrs2 = YAML.load(
-            on(host, 'puppet resource file /tmp/add_file4 --to_yaml').output.strip
+          new_file_attrs2 = YAML.safe_load(
+            on(host, 'puppet resource file /tmp/add_file4 --to_yaml').stdout.strip
           )['file']['/tmp/add_file4']
 
           # Remove things that will have changed

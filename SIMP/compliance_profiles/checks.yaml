@@ -1,0 +1,85 @@
+---
+version: 2.0.0
+checks:
+  oval:com.puppet.forge.simp.deferred_resources.mode:
+    settings:
+      parameter: deferred_resources::mode
+      value: enforcing
+    type: puppet-class-parameter
+    controls:
+      nist_800_53:rev4: true
+      nist_800_53:rev4:CM-6: true
+      nist_800_53:rev4:CM-6:1: true
+      disa_stig: true
+      RHEL-07-020620: true
+      SRG-OS-000480-GPOS-00227: true
+      cci:CCI-000336: true
+    identifiers:
+      nist_800_53:rev4:
+      - CM-6
+      - CM-6:1
+      disa_stig:
+      - RHEL-07-020620
+      - SRG-OS-000480-GPOS-00227
+      - CCI-000336
+    confine:
+      kernel: Linux
+    oval-ids:
+    - xccdf_org.ssgproject.content_rule_accounts_user_interactive_home_directory_exist
+    - accounts_user_interactive_home_directory_exist
+  oval:com.puppet.forge.simp.deferred_resources.users.remove:
+    settings:
+      parameter: deferred_resources::users::remove
+      value:
+      - ftp
+      - games
+    type: puppet-class-parameter
+    controls:
+      nist_800_53:rev4: true
+      nist_800_53:rev4:CM-6: true
+      nist_800_53:rev4:CM-6:1: true
+      disa_stig: true
+      RHEL-07-020620: true
+      SRG-OS-000480-GPOS-00227: true
+      cci:CCI-000336: true
+    identifiers:
+      nist_800_53:rev4:
+      - CM-6
+      - CM-6:1
+      disa_stig:
+      - RHEL-07-020620
+      - SRG-OS-000480-GPOS-00227
+      - CCI-000336
+    confine:
+      kernel: Linux
+    oval-ids:
+    - xccdf_org.ssgproject.content_rule_accounts_user_interactive_home_directory_exist
+    - accounts_user_interactive_home_directory_exist
+  oval:com.puppet.forge.simp.deferred_resources.groups.remove:
+    settings:
+      parameter: deferred_resources::groups::remove
+      value:
+      - ftp
+      - games
+    type: puppet-class-parameter
+    controls:
+      nist_800_53:rev4: true
+      nist_800_53:rev4:CM-6: true
+      nist_800_53:rev4:CM-6:1: true
+      disa_stig: true
+      RHEL-07-020620: true
+      SRG-OS-000480-GPOS-00227: true
+      cci:CCI-000336: true
+    identifiers:
+      nist_800_53:rev4:
+      - CM-6
+      - CM-6:1
+      disa_stig:
+      - RHEL-07-020620
+      - SRG-OS-000480-GPOS-00227
+      - CCI-000336
+    confine:
+      kernel: Linux
+    oval-ids:
+    - xccdf_org.ssgproject.content_rule_accounts_user_interactive_home_directory_exist
+    - accounts_user_interactive_home_directory_exist
