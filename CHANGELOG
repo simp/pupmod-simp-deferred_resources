@@ -1,3 +1,8 @@
+* Thu Oct 31 2019 Liz Nemsick <lnemsick.simp@gmail.com> - 0.2.3
+- Remove 'ftp' and 'games' users and groups when enforcing STIG
+  compliance.
+- Support simp/simplib 5.x.
+
 * Fri Aug 02 2019 Robert Vincent <pillarsdotnet@gmail.com> - 0.2.3
 - Support puppetlabs/stdlib 6.x.
 
