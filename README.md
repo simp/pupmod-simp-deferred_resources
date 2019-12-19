@@ -37,6 +37,8 @@ This module provides capabilities to add resources to the puppet catalog
 >
 > **WARNING:**
 
+See [REFERENCE.md](./REFERENCE.md) for full API details.
+
 ### This is a SIMP module
 
 This module is a component of the [System Integrity Management Platform](https://simp-project.com),

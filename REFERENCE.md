@@ -196,6 +196,17 @@ A list of packages to remove.
 
 Default value: {}
 
+##### `remove_ensure`
+
+Data type: `Enum['absent','purged']`
+
+If removing, then this is the state that the packages should have.
+
+* This will be overridden by anything set in options applied to an entry in
+  the `$remove` Hash.
+
+Default value: 'absent'
+
 ##### `install`
 
 Data type: `Variant[Hash, Array]`
@@ -362,7 +373,7 @@ they exist.
 
    * 'invalidates':
      * An Array of entries that this particular parameter invalidates.
-       This means that the items in the lisst will be set to `nil` in the
+       This means that the items in the list will be set to `nil` in the
        overridden resource.
 
 ##### `log_level`

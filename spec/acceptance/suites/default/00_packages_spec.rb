@@ -5,8 +5,8 @@ test_name 'deferred package resources'
 describe 'deferred package resources' do
   let(:manifest) {
     <<-EOS
-      package { 'screen':      ensure => 'absent'}
-      package { 'rsh-server':  ensure => 'installed'}
+      package { 'tmpwatch':  ensure => 'absent'}
+      package { 'dos2unix':  ensure => 'installed'}
 
       include 'deferred_resources'
     EOS
@@ -16,10 +16,10 @@ describe 'deferred package resources' do
 ---
 deferred_resources::packages::remove:
   'ypserv': ~
-  'rsh-server': ~
+  'dos2unix': ~
   'vsftpd': ~
 deferred_resources::packages::install:
-  - 'screen'
+  - 'tmpwatch'
   - 'esc'
   - 'zsh'
 deferred_resources::packages::install_ensure: 'present'
@@ -47,12 +47,12 @@ deferred_resources::log_level: 'debug'
 
         it 'should have correct packages installed' do
           # package with ensure absent
-          ['screen'].each do |pkg|
+          ['tmpwatch'].each do |pkg|
               expect(host.check_for_package(pkg)).to eq false
           end
 
           # previously installed package and package with ensure present
-          ['ypserv','rsh-server'].each do |pkg|
+          ['ypserv','dos2unix'].each do |pkg|
               expect(host.check_for_package(pkg)).to eq true
           end
         end
@@ -69,7 +69,7 @@ deferred_resources::log_level: 'debug'
           result = apply_manifest_on(host, manifest, :accept_all_exit_codes => true)
 
           # packages ignored by deferred_resources because they are already in the catalogue
-          ['screen','rsh-server'].each do |pkg|
+          ['tmpwatch','dos2unix'].each do |pkg|
             expect(result.stdout).to match(/Existing resource 'Package\[#{pkg}\]' .+ has options that differ/m)
           end
 
@@ -86,13 +86,13 @@ deferred_resources::log_level: 'debug'
 
         it 'should not have changed the packages installed' do
           # package removed by another catalogue resource
-          ['screen'].each do |pkg|
+          ['tmpwatch'].each do |pkg|
               expect(host.check_for_package(pkg)).to eq false
           end
 
           # 1 package that would have been removed by deferred_resources and
           # 1 package installed by another catalog resource
-          ['ypserv','rsh-server'].each do |pkg|
+          ['ypserv','dos2unix'].each do |pkg|
               expect(host.check_for_package(pkg)).to eq true
           end
         end
@@ -108,7 +108,7 @@ deferred_resources::log_level: 'debug'
           result = apply_manifest_on(host, manifest, :accept_all_exit_codes => true)
 
           # packages ignored by deferred_resources because they are already in the catalogue
-          ['screen','rsh-server'].each do |pkg|
+          ['tmpwatch','dos2unix'].each do |pkg|
             expect(result.stdout).not_to match(/Existing resource 'Package\[#{pkg}\]' .+ has options that differ/m)
           end
 
@@ -122,13 +122,13 @@ deferred_resources::log_level: 'debug'
         it 'should have removed and installed packages' do
           # 1st package removed by another catalog resource and 2 remaining packages
           # removed by deferred_resources
-          ['screen','ypserv','vsftpd'].each do |pkg|
+          ['tmpwatch','ypserv','vsftpd'].each do |pkg|
               expect(host.check_for_package(pkg)).to eq false
           end
 
           # 1st package installed by another catalog resource and 2 remaining packages
           # removed by deferred_resources
-          ['rsh-server','esc', 'zsh'].each do |pkg|
+          ['dos2unix','esc', 'zsh'].each do |pkg|
               expect(host.check_for_package(pkg)).to eq true
           end
         end
