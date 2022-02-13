@@ -203,7 +203,7 @@ describe deferred_resources_type do
           expect(result[:owner]).to eq('bob')
           expect(result[:group]).to eq('alice')
           expect(result.parameter(:content).actual_content).to eq('Some stuff')
-          expect(result[:mode]).to eq('644')
+          expect(result[:mode]).to match(/^0?644$/)
         end
 
         it 'should not affect unrelated resources' do
@@ -223,14 +223,14 @@ describe deferred_resources_type do
           expect(result[:owner]).to eq('bob')
           expect(result[:group]).to eq('alice')
           expect(result.parameter(:content).actual_content).to eq('Some stuff')
-          expect(result[:mode]).to eq('644')
+          expect(result[:mode]).to match(/^0?644$/)
 
           pristine_result = @catalog.resource('File[/tmp/test2]')
 
           expect(pristine_result[:owner]).to eq('root')
           expect(pristine_result[:group]).to eq('root')
           expect(pristine_result.parameter(:content).actual_content).to eq('Test')
-          expect(pristine_result[:mode]).to eq('644')
+          expect(result[:mode]).to match(/^0?644$/)
         end
       end
 
@@ -275,7 +275,7 @@ describe deferred_resources_type do
           expect(result[:owner]).to eq('bob')
           expect(result[:group]).to eq('alice')
           expect(result.parameter(:content).actual_content).to eq('Some stuff')
-          expect(result[:mode]).to eq('644')
+          expect(result[:mode]).to match(/^0?644$/)
           expect(result[:source]).to be_nil
         end
 
@@ -318,7 +318,7 @@ describe deferred_resources_type do
           expect(result[:owner]).to eq('bob')
           expect(result[:group]).to eq('alice')
           expect(result[:content]).to be_nil
-          expect(result[:mode]).to eq('644')
+          expect(result[:mode]).to match(/^0?644$/)
           expect(result[:source]).to eq(['puppet:///my.server/test'])
         end
 
@@ -428,7 +428,7 @@ describe deferred_resources_type do
           expect(result[:group]).to eq('root')
           expect(result[:source]).to eq(['puppet:///my.server/test'])
           expect(result[:content]).to be_nil
-          expect(result[:mode]).to eq('644')
+          expect(result[:mode]).to match(/^0?644$/)
       end
     end
   end

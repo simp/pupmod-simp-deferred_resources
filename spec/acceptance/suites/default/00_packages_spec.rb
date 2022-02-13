@@ -20,7 +20,6 @@ deferred_resources::packages::remove:
   'vsftpd': ~
 deferred_resources::packages::install:
   - 'tmpwatch'
-  - 'esc'
   - 'zsh'
 deferred_resources::packages::install_ensure: 'present'
     EOD
@@ -79,7 +78,7 @@ deferred_resources::log_level: 'debug'
           end
 
           # packages that are only in deferred_resources::packages::install
-          ['esc','zsh'].each do |pkg|
+          ['zsh'].each do |pkg|
              expect(result.stdout).to match(/Would have created Package\[#{pkg}\] with.*:ensure=>"present"/m)
           end
         end
@@ -114,7 +113,7 @@ deferred_resources::log_level: 'debug'
 
           # packages that are only in deferred_resources::packages::remove or
           # deferred_resources::packages::install
-          ['vsftpd','ypserv','esc','zsh'].each do |pkg|
+          ['vsftpd','ypserv','zsh'].each do |pkg|
              expect(result.stdout).not_to match(/Would have created Package\[#{pkg}\]/m)
           end
         end
@@ -128,7 +127,7 @@ deferred_resources::log_level: 'debug'
 
           # 1st package installed by another catalog resource and 2 remaining packages
           # removed by deferred_resources
-          ['dos2unix','esc', 'zsh'].each do |pkg|
+          ['dos2unix','zsh'].each do |pkg|
               expect(host.check_for_package(pkg)).to eq true
           end
         end
