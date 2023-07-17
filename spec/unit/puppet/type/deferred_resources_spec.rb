@@ -111,11 +111,12 @@ describe deferred_resources_type do
     end
   end
 
-  context 'when processing the catalog' do
-    before(:each) do
-      @catalog = Puppet::Resource::Catalog.new
 
-      Puppet::Type::Deferred_resources.any_instance.stubs(:catalog).returns(@catalog)
+  context 'when processing the catalog' do
+    let(:catalog){ Puppet::Resource::Catalog.new }
+    before do
+      @catalog = Puppet::Resource::Catalog.new
+      allow_any_instance_of(Puppet::Type::Deferred_resources).to receive(:catalog).and_return(@catalog)
     end
 
     context 'when enforcing' do
@@ -142,7 +143,7 @@ describe deferred_resources_type do
 
         @catalog.create_resource('Package', {'name' => 'mypackage'})
 
-        Puppet.expects(:debug).with('deferred_resources: Ignoring existing resource Package[mypackage]').once
+        expect(Puppet).to receive(:debug).with('deferred_resources: Ignoring existing resource Package[mypackage]').once
 
         resource.autorequire
       end
@@ -161,7 +162,7 @@ describe deferred_resources_type do
 
         @catalog.create_resource('Package', {'name' => 'mypackage', 'ensure' => 'absent'})
 
-        Puppet.expects(:send).with(:warning, "deferred_resources: Existing resource 'Package[mypackage]' at ':' has options that differ from deferred_resources::<x> parameters").once
+        expect(Puppet).to receive(:send).with(:warning, "deferred_resources: Existing resource 'Package[mypackage]' at ':' has options that differ from deferred_resources::<x> parameters").once
 
         resource.autorequire
       end
@@ -378,7 +379,7 @@ describe deferred_resources_type do
           :default_options => { 'ensure' => 'absent' }
         )
 
-        Puppet.expects(:send).with(:warning, 'deferred_resources: Would have created Package[mypackage] with {:ensure=>"absent"}').once
+        expect(Puppet).to receive(:send).with(:warning, 'deferred_resources: Would have created Package[mypackage] with {:ensure=>"absent"}').once
 
         resource.autorequire
 
@@ -418,7 +419,7 @@ describe deferred_resources_type do
             'mode'    => '0644'
           })
 
-          Puppet.expects(:send).with(:warning, %{deferred_resources: Would have overridden attributes 'owner', 'group', 'content' on existing resource File[/tmp/test]}).once
+          expect(Puppet).to receive(:send).with(:warning, %{deferred_resources: Would have overridden attributes 'owner', 'group', 'content' on existing resource File[/tmp/test]}).once
 
           @resource.autorequire
 
