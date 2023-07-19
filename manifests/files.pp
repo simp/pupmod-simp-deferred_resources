@@ -61,11 +61,11 @@ class deferred_resources::files (
 
   unless empty($remove) {
     deferred_resources{ "${module_name} File remove":
-      resources                    => $remove,
-      resource_type                => 'file',
-      default_options              => { 'ensure' => 'absent' },
-      mode                         => $mode,
-      log_level                    => $log_level
+      resources       => $remove,
+      resource_type   => 'file',
+      default_options => { 'ensure' => 'absent' },
+      mode            => $mode,
+      log_level       => $log_level
     }
   }
 
