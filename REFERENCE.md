@@ -7,10 +7,10 @@
 ### Classes
 
 * [`deferred_resources`](#deferred_resources)
-* [`deferred_resources::files`](#deferred_resourcesfiles): This class takes an Array of file resources to remove, and a Hash of file resources to install.  After the entire puppet catalog has been com
-* [`deferred_resources::groups`](#deferred_resourcesgroups): This class takes an Array of group resources to remove, and a Hash of group resources to install.  After the entire puppet catalog has been c
-* [`deferred_resources::packages`](#deferred_resourcespackages): This class takes two `Hashes` of packages, one to remove and one to install.  After the entire puppet catalog has been compiled, it will proc
-* [`deferred_resources::users`](#deferred_resourcesusers): This class takes an Array of user resources to remove, and a Hash of user resources to install.  After the entire puppet catalog has been com
+* [`deferred_resources::files`](#deferred_resources--files): This class takes an Array of file resources to remove, and a Hash of file resources to install.  After the entire puppet catalog has been com
+* [`deferred_resources::groups`](#deferred_resources--groups): This class takes an Array of group resources to remove, and a Hash of group resources to install.  After the entire puppet catalog has been c
+* [`deferred_resources::packages`](#deferred_resources--packages): This class takes two `Hashes` of packages, one to remove and one to install.  After the entire puppet catalog has been compiled, it will proc
+* [`deferred_resources::users`](#deferred_resources--users): This class takes an Array of user resources to remove, and a Hash of user resources to install.  After the entire puppet catalog has been com
 
 ### Resource types
 
@@ -26,11 +26,11 @@ The deferred_resources class.
 
 The following parameters are available in the `deferred_resources` class:
 
-* [`mode`](#mode)
-* [`log_level`](#log_level)
-* [`auto_include`](#auto_include)
+* [`mode`](#-deferred_resources--mode)
+* [`log_level`](#-deferred_resources--log_level)
+* [`auto_include`](#-deferred_resources--auto_include)
 
-##### <a name="mode"></a>`mode`
+##### <a name="-deferred_resources--mode"></a>`mode`
 
 Data type: `Enum['warning','enforcing']`
 
@@ -40,7 +40,7 @@ have taken place on the system but the catalog will not be updated.
 
 Default value: `'warning'`
 
-##### <a name="log_level"></a>`log_level`
+##### <a name="-deferred_resources--log_level"></a>`log_level`
 
 Data type: `Simplib::PuppetLogLevel`
 
@@ -48,15 +48,15 @@ Set the log level for warning messages
 
 Default value: `'info'`
 
-##### <a name="auto_include"></a>`auto_include`
+##### <a name="-deferred_resources--auto_include"></a>`auto_include`
 
 Data type: `Boolean`
 
 
 
-Default value: ``true``
+Default value: `true`
 
-### <a name="deferred_resourcesfiles"></a>`deferred_resources::files`
+### <a name="deferred_resources--files"></a>`deferred_resources::files`
 
 This class takes an Array of file resources to remove, and a Hash of file
 resources to install.
@@ -71,13 +71,13 @@ An exception will be raised if you list the same file in both lists.
 
 The following parameters are available in the `deferred_resources::files` class:
 
-* [`remove`](#remove)
-* [`install`](#install)
-* [`update_existing_resources`](#update_existing_resources)
-* [`mode`](#mode)
-* [`log_level`](#log_level)
+* [`remove`](#-deferred_resources--files--remove)
+* [`install`](#-deferred_resources--files--install)
+* [`update_existing_resources`](#-deferred_resources--files--update_existing_resources)
+* [`mode`](#-deferred_resources--files--mode)
+* [`log_level`](#-deferred_resources--files--log_level)
 
-##### <a name="remove"></a>`remove`
+##### <a name="-deferred_resources--files--remove"></a>`remove`
 
 Data type: `Array[Stdlib::Absolutepath]`
 
@@ -85,7 +85,7 @@ A list of files to remove.
 
 Default value: `[]`
 
-##### <a name="install"></a>`install`
+##### <a name="-deferred_resources--files--install"></a>`install`
 
 Data type: `Hash[Stdlib::Absolutepath, Hash]`
 
@@ -93,7 +93,7 @@ A Hash of files to install.
 
 Default value: `{}`
 
-##### <a name="update_existing_resources"></a>`update_existing_resources`
+##### <a name="-deferred_resources--files--update_existing_resources"></a>`update_existing_resources`
 
 Data type: `Boolean`
 
@@ -113,9 +113,9 @@ Collector.
 
 @see https://puppet.com/docs/puppet/5.3/lang_resources_advanced.html#amending-attributes-with-a-collector
 
-Default value: ``false``
+Default value: `false`
 
-##### <a name="mode"></a>`mode`
+##### <a name="-deferred_resources--files--mode"></a>`mode`
 
 Data type: `Enum['warning','enforcing']`
 
@@ -123,7 +123,7 @@ Data type: `Enum['warning','enforcing']`
 
 Default value: `$deferred_resources::mode`
 
-##### <a name="log_level"></a>`log_level`
+##### <a name="-deferred_resources--files--log_level"></a>`log_level`
 
 Data type: `Simplib::PuppetLogLevel`
 
@@ -131,7 +131,7 @@ Data type: `Simplib::PuppetLogLevel`
 
 Default value: `$deferred_resources::log_level`
 
-### <a name="deferred_resourcesgroups"></a>`deferred_resources::groups`
+### <a name="deferred_resources--groups"></a>`deferred_resources::groups`
 
 This class takes an Array of group resources to remove, and a Hash of group
 resources to install.
@@ -146,12 +146,12 @@ An exception will be raised if you list the same group in both lists.
 
 The following parameters are available in the `deferred_resources::groups` class:
 
-* [`remove`](#remove)
-* [`install`](#install)
-* [`mode`](#mode)
-* [`log_level`](#log_level)
+* [`remove`](#-deferred_resources--groups--remove)
+* [`install`](#-deferred_resources--groups--install)
+* [`mode`](#-deferred_resources--groups--mode)
+* [`log_level`](#-deferred_resources--groups--log_level)
 
-##### <a name="remove"></a>`remove`
+##### <a name="-deferred_resources--groups--remove"></a>`remove`
 
 Data type: `Array[String[1]]`
 
@@ -159,7 +159,7 @@ A list of groups to remove.
 
 Default value: `[]`
 
-##### <a name="install"></a>`install`
+##### <a name="-deferred_resources--groups--install"></a>`install`
 
 Data type: `Variant[Hash, Array[String[1]]]`
 
@@ -171,7 +171,7 @@ A list of groups to install.
 
 Default value: `{}`
 
-##### <a name="mode"></a>`mode`
+##### <a name="-deferred_resources--groups--mode"></a>`mode`
 
 Data type: `Enum['warning','enforcing']`
 
@@ -179,7 +179,7 @@ Data type: `Enum['warning','enforcing']`
 
 Default value: `$deferred_resources::mode`
 
-##### <a name="log_level"></a>`log_level`
+##### <a name="-deferred_resources--groups--log_level"></a>`log_level`
 
 Data type: `Simplib::PuppetLogLevel`
 
@@ -187,7 +187,7 @@ Data type: `Simplib::PuppetLogLevel`
 
 Default value: `$deferred_resources::log_level`
 
-### <a name="deferred_resourcespackages"></a>`deferred_resources::packages`
+### <a name="deferred_resources--packages"></a>`deferred_resources::packages`
 
 This class takes two `Hashes` of packages, one to remove and one to install.
 
@@ -201,15 +201,15 @@ An exception will be raised if you list the same package in both lists.
 
 The following parameters are available in the `deferred_resources::packages` class:
 
-* [`remove`](#remove)
-* [`remove_ensure`](#remove_ensure)
-* [`install`](#install)
-* [`install_ensure`](#install_ensure)
-* [`default_options`](#default_options)
-* [`mode`](#mode)
-* [`log_level`](#log_level)
+* [`remove`](#-deferred_resources--packages--remove)
+* [`remove_ensure`](#-deferred_resources--packages--remove_ensure)
+* [`install`](#-deferred_resources--packages--install)
+* [`install_ensure`](#-deferred_resources--packages--install_ensure)
+* [`default_options`](#-deferred_resources--packages--default_options)
+* [`mode`](#-deferred_resources--packages--mode)
+* [`log_level`](#-deferred_resources--packages--log_level)
 
-##### <a name="remove"></a>`remove`
+##### <a name="-deferred_resources--packages--remove"></a>`remove`
 
 Data type: `Variant[Hash, Array]`
 
@@ -220,7 +220,7 @@ A list of packages to remove.
 
 Default value: `{}`
 
-##### <a name="remove_ensure"></a>`remove_ensure`
+##### <a name="-deferred_resources--packages--remove_ensure"></a>`remove_ensure`
 
 Data type: `Enum['absent','purged']`
 
@@ -231,7 +231,7 @@ If removing, then this is the state that the packages should have.
 
 Default value: `'absent'`
 
-##### <a name="install"></a>`install`
+##### <a name="-deferred_resources--packages--install"></a>`install`
 
 Data type: `Variant[Hash, Array]`
 
@@ -242,7 +242,7 @@ A list of packages to install.
 
 Default value: `{}`
 
-##### <a name="install_ensure"></a>`install_ensure`
+##### <a name="-deferred_resources--packages--install_ensure"></a>`install_ensure`
 
 Data type: `Enum['latest','present','installed']`
 
@@ -253,7 +253,7 @@ If installing, then this is the state that the packages should have.
 
 Default value: `simplib::lookup('simp_options::package_ensure', { 'default_value' => 'installed' })`
 
-##### <a name="default_options"></a>`default_options`
+##### <a name="-deferred_resources--packages--default_options"></a>`default_options`
 
 Data type: `Hash`
 
@@ -265,7 +265,7 @@ If ensure is entered in these options it will be overwritten.
 
 Default value: `{}`
 
-##### <a name="mode"></a>`mode`
+##### <a name="-deferred_resources--packages--mode"></a>`mode`
 
 Data type: `Enum['warning','enforcing']`
 
@@ -273,7 +273,7 @@ Data type: `Enum['warning','enforcing']`
 
 Default value: `$deferred_resources::mode`
 
-##### <a name="log_level"></a>`log_level`
+##### <a name="-deferred_resources--packages--log_level"></a>`log_level`
 
 Data type: `Simplib::PuppetLogLevel`
 
@@ -281,7 +281,7 @@ Data type: `Simplib::PuppetLogLevel`
 
 Default value: `$deferred_resources::log_level`
 
-### <a name="deferred_resourcesusers"></a>`deferred_resources::users`
+### <a name="deferred_resources--users"></a>`deferred_resources::users`
 
 This class takes an Array of user resources to remove, and a Hash of user
 resources to install.
@@ -296,12 +296,12 @@ An exception will be raised if you list the same user in both lists.
 
 The following parameters are available in the `deferred_resources::users` class:
 
-* [`remove`](#remove)
-* [`install`](#install)
-* [`mode`](#mode)
-* [`log_level`](#log_level)
+* [`remove`](#-deferred_resources--users--remove)
+* [`install`](#-deferred_resources--users--install)
+* [`mode`](#-deferred_resources--users--mode)
+* [`log_level`](#-deferred_resources--users--log_level)
 
-##### <a name="remove"></a>`remove`
+##### <a name="-deferred_resources--users--remove"></a>`remove`
 
 Data type: `Array[String[1]]`
 
@@ -309,7 +309,7 @@ A list of users to remove.
 
 Default value: `[]`
 
-##### <a name="install"></a>`install`
+##### <a name="-deferred_resources--users--install"></a>`install`
 
 Data type: `Variant[Hash, Array[String[1]]]`
 
@@ -321,7 +321,7 @@ A list of users to install.
 
 Default value: `{}`
 
-##### <a name="mode"></a>`mode`
+##### <a name="-deferred_resources--users--mode"></a>`mode`
 
 Data type: `Enum['warning','enforcing']`
 
@@ -329,7 +329,7 @@ Data type: `Enum['warning','enforcing']`
 
 Default value: `$deferred_resources::mode`
 
-##### <a name="log_level"></a>`log_level`
+##### <a name="-deferred_resources--users--log_level"></a>`log_level`
 
 Data type: `Simplib::PuppetLogLevel`
 
@@ -364,21 +364,21 @@ it prints out a list of resources that would have been added.
 
 The following parameters are available in the `deferred_resources` type.
 
-* [`default_options`](#default_options)
-* [`log_level`](#log_level)
-* [`mode`](#mode)
-* [`name`](#name)
-* [`override_existing_attributes`](#override_existing_attributes)
-* [`resource_type`](#resource_type)
-* [`resources`](#resources)
+* [`default_options`](#-deferred_resources--default_options)
+* [`log_level`](#-deferred_resources--log_level)
+* [`mode`](#-deferred_resources--mode)
+* [`name`](#-deferred_resources--name)
+* [`override_existing_attributes`](#-deferred_resources--override_existing_attributes)
+* [`resource_type`](#-deferred_resources--resource_type)
+* [`resources`](#-deferred_resources--resources)
 
-##### <a name="default_options"></a>`default_options`
+##### <a name="-deferred_resources--default_options"></a>`default_options`
 
 A Hash of options to be used for all resources.
 
 Default value: `Hash.new`
 
-##### <a name="log_level"></a>`log_level`
+##### <a name="-deferred_resources--log_level"></a>`log_level`
 
 Valid values: `alert`, `crit`, `debug`, `notice`, `emerg`, `err`, `info`, `warning`
 
@@ -386,7 +386,7 @@ Set the message log level for notifications.
 
 Default value: `warning`
 
-##### <a name="mode"></a>`mode`
+##### <a name="-deferred_resources--mode"></a>`mode`
 
 Valid values: `enforcing`, `warning`
 
@@ -396,13 +396,13 @@ Valid values: `enforcing`, `warning`
 
 Default value: `warning`
 
-##### <a name="name"></a>`name`
+##### <a name="-deferred_resources--name"></a>`name`
 
 namevar
 
 Unique name for this resource.
 
-##### <a name="override_existing_attributes"></a>`override_existing_attributes`
+##### <a name="-deferred_resources--override_existing_attributes"></a>`override_existing_attributes`
 
 A Hash or Array of items that should be updated on existing attributes if
 they exist.
@@ -421,13 +421,13 @@ they exist.
        This means that the items in the list will be set to `nil` in the
        overridden resource.
 
-##### <a name="resource_type"></a>`resource_type`
+##### <a name="-deferred_resources--resource_type"></a>`resource_type`
 
 Valid values: `/.+/`
 
 The type of Puppet resource that will be passed in :resources
 
-##### <a name="resources"></a>`resources`
+##### <a name="-deferred_resources--resources"></a>`resources`
 
 A Hash or Array of resources to add to the catalog.
 
