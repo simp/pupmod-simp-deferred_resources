@@ -1,7 +1,7 @@
 module Acceptance; end
 module Acceptance::Helpers; end
-module Acceptance::Helpers::ResourceCheckers
 
+module Acceptance::Helpers::ResourceCheckers
   require 'yaml'
 
   def has_file?(host, file)
@@ -15,7 +15,7 @@ module Acceptance::Helpers::ResourceCheckers
       end
     end
 
-    return false
+    false
   end
 
   def has_group?(host, group)
@@ -28,7 +28,7 @@ module Acceptance::Helpers::ResourceCheckers
       end
     end
 
-    return false
+    false
   end
 
   def has_user?(host, user)
@@ -41,6 +41,6 @@ module Acceptance::Helpers::ResourceCheckers
       end
     end
 
-    return false
+    false
   end
 end
