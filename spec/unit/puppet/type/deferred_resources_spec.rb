@@ -26,11 +26,11 @@ describe deferred_resources_type do
         )
 
         expect(resource[:name]).to eq('foo')
-        expect(resource[:resources]).to eq({
-                                             'mypackage' => {
-                                               'name' => 'mypackage'
-                                             }
-                                           })
+        expect(resource[:resources]).to eq(
+          'mypackage' => {
+            'name' => 'mypackage',
+          },
+        )
       end
 
       it 'accepts an Array' do
@@ -40,14 +40,14 @@ describe deferred_resources_type do
           resources: ['mypackage', 'myotherpackage'],
         )
 
-        expect(resource[:resources]).to eq({
-                                             'mypackage' => {
-                                               'name' => 'mypackage'
-                                             },
+        expect(resource[:resources]).to eq(
+          'mypackage' => {
+            'name' => 'mypackage',
+          },
           'myotherpackage' => {
-            'name' => 'myotherpackage'
-          }
-                                           })
+            'name' => 'myotherpackage',
+          },
+        )
       end
 
       it 'fails if not passed' do
@@ -115,8 +115,9 @@ describe deferred_resources_type do
     let(:catalog) { Puppet::Resource::Catalog.new }
 
     before(:each) do
-      @catalog = Puppet::Resource::Catalog.new
-      allow_any_instance_of(Puppet::Type::Deferred_resources).to receive(:catalog).and_return(@catalog)
+      # rubocop:disable RSpec/AnyInstance
+      allow_any_instance_of(Puppet::Type::Deferred_resources).to receive(:catalog).and_return(catalog)
+      # rubocop:enable RSpec/AnyInstance
     end
 
     context 'when enforcing' do
@@ -130,7 +131,7 @@ describe deferred_resources_type do
 
         resource.autorequire
 
-        expect(@catalog.resource('Package', 'mypackage')).not_to be_nil
+        expect(catalog.resource('Package', 'mypackage')).not_to be_nil
       end
 
       it 'skips matching existing resources' do
@@ -141,7 +142,7 @@ describe deferred_resources_type do
           mode: 'enforcing',
         )
 
-        @catalog.create_resource('Package', { 'name' => 'mypackage' })
+        catalog.create_resource('Package', { 'name' => 'mypackage' })
 
         expect(Puppet).to receive(:debug).with('deferred_resources: Ignoring existing resource Package[mypackage]').once
 
@@ -160,7 +161,7 @@ describe deferred_resources_type do
           mode: 'enforcing',
         )
 
-        @catalog.create_resource('Package', { 'name' => 'mypackage', 'ensure' => 'absent' })
+        catalog.create_resource('Package', { 'name' => 'mypackage', 'ensure' => 'absent' })
 
         expect(Puppet).to receive(:send).with(:warning, "deferred_resources: Existing resource 'Package[mypackage]' at ':' has options that differ from deferred_resources::<x> parameters").once
 
@@ -168,8 +169,8 @@ describe deferred_resources_type do
       end
 
       context 'when overriding resources' do
-        before(:each) do
-          @resource = deferred_resources_type.new(
+        let(:resource) do
+          deferred_resources_type.new(
             name: 'foo',
             resource_type: 'file',
             mode: 'enforcing',
@@ -185,21 +186,26 @@ describe deferred_resources_type do
               }
             },
           )
+        end
 
-          @catalog.create_resource('File', {
-                                     'name'    => '/tmp/test',
-            'ensure'  => 'file',
-            'owner'   => 'root',
-            'group'   => 'root',
-            'content' => 'Test',
-            'mode'    => '0644'
-                                   })
+        before(:each) do
+          catalog.create_resource(
+            'File',
+            {
+              'name'    => '/tmp/test',
+              'ensure'  => 'file',
+              'owner'   => 'root',
+              'group'   => 'root',
+              'content' => 'Test',
+              'mode'    => '0644',
+            },
+          )
         end
 
         it 'overrides attributes in an existing catalog resource' do
-          @resource.autorequire
+          resource.autorequire
 
-          result = @catalog.resource('File[/tmp/test]')
+          result = catalog.resource('File[/tmp/test]')
 
           expect(result[:owner]).to eq('bob')
           expect(result[:group]).to eq('alice')
@@ -208,25 +214,28 @@ describe deferred_resources_type do
         end
 
         it 'does not affect unrelated resources' do
-          @catalog.create_resource('File', {
-                                     'name'    => '/tmp/test2',
-            'ensure'  => 'file',
-            'owner'   => 'root',
-            'group'   => 'root',
-            'content' => 'Test',
-            'mode'    => '0644'
-                                   })
+          catalog.create_resource(
+            'File',
+            {
+              'name'    => '/tmp/test2',
+              'ensure'  => 'file',
+              'owner'   => 'root',
+              'group'   => 'root',
+              'content' => 'Test',
+              'mode'    => '0644',
+            },
+          )
 
-          @resource.autorequire
+          resource.autorequire
 
-          result = @catalog.resource('File[/tmp/test]')
+          result = catalog.resource('File[/tmp/test]')
 
           expect(result[:owner]).to eq('bob')
           expect(result[:group]).to eq('alice')
           expect(result.parameter(:content).actual_content).to eq('Some stuff')
           expect(result[:mode]).to match(%r{^0?644$})
 
-          pristine_result = @catalog.resource('File[/tmp/test2]')
+          pristine_result = catalog.resource('File[/tmp/test2]')
 
           expect(pristine_result[:owner]).to eq('root')
           expect(pristine_result[:group]).to eq('root')
@@ -237,7 +246,7 @@ describe deferred_resources_type do
 
       context 'when overriding and invalidating attributes' do
         it 'overrides attributes in an existing catalog resource and invalidate "source"' do
-          @resource = deferred_resources_type.new(
+          resource = deferred_resources_type.new(
             name: 'foo',
             resource_type: 'file',
             mode: 'enforcing',
@@ -260,18 +269,21 @@ describe deferred_resources_type do
             },
           )
 
-          @catalog.create_resource('File', {
-                                     'name'    => '/tmp/test',
-            'ensure'  => 'file',
-            'owner'   => 'root',
-            'group'   => 'root',
-            'source' => 'puppet:///my.server/test',
-            'mode' => '0644'
-                                   })
+          catalog.create_resource(
+            'File',
+            {
+              'name'   => '/tmp/test',
+              'ensure' => 'file',
+              'owner'  => 'root',
+              'group'  => 'root',
+              'source' => 'puppet:///my.server/test',
+              'mode'   => '0644',
+            },
+          )
 
-          @resource.autorequire
+          resource.autorequire
 
-          result = @catalog.resource('File[/tmp/test]')
+          result = catalog.resource('File[/tmp/test]')
 
           expect(result[:owner]).to eq('bob')
           expect(result[:group]).to eq('alice')
@@ -281,7 +293,7 @@ describe deferred_resources_type do
         end
 
         it 'does not remove attributes that are not present in the override resource' do
-          @resource = deferred_resources_type.new(
+          resource = deferred_resources_type.new(
             name: 'foo',
             resource_type: 'file',
             mode: 'enforcing',
@@ -289,8 +301,8 @@ describe deferred_resources_type do
               'owner'   => nil,
               'group'   => nil,
               'content' => {
-                'invalidates' => ['source']
-              }
+                'invalidates' => ['source'],
+              },
             },
             resources: {
               '/tmp/test' => {
@@ -298,23 +310,26 @@ describe deferred_resources_type do
                 'owner'   => 'bob',
                 'group'   => 'alice',
                 # This should be ignored
-                'mode'    => '0777'
+                'mode'    => '0777',
               }
             },
           )
 
-          @catalog.create_resource('File', {
-                                     'name'    => '/tmp/test',
-            'ensure'  => 'file',
-            'owner'   => 'root',
-            'group'   => 'root',
-            'source' => 'puppet:///my.server/test',
-            'mode' => '0644'
-                                   })
+          catalog.create_resource(
+            'File',
+            {
+              'name'   => '/tmp/test',
+              'ensure' => 'file',
+              'owner'  => 'root',
+              'group'  => 'root',
+              'source' => 'puppet:///my.server/test',
+              'mode'   => '0644',
+            },
+          )
 
-          @resource.autorequire
+          resource.autorequire
 
-          result = @catalog.resource('File[/tmp/test]')
+          result = catalog.resource('File[/tmp/test]')
 
           expect(result[:owner]).to eq('bob')
           expect(result[:group]).to eq('alice')
@@ -355,13 +370,13 @@ describe deferred_resources_type do
                 'owner'   => nil,
                 'group'   => nil,
                 'content' => {
-                  'invalidates' => 'cheese'
-                }
+                  'invalidates' => 'cheese',
+                },
               },
               resources: {
                 '/tmp/test' => {
-                  'mode' => '0777'
-                }
+                  'mode' => '0777',
+                },
               },
             )
           }.to raise_error(%r{You must pass an Array of attributes to override for 'content'})
@@ -383,11 +398,11 @@ describe deferred_resources_type do
 
         resource.autorequire
 
-        expect(@catalog.resource('Package', 'mypackage')).to be_nil
+        expect(catalog.resource('Package', 'mypackage')).to be_nil
       end
 
       it 'does not override any existing resources' do
-        @resource = deferred_resources_type.new(
+        resource = deferred_resources_type.new(
           name: 'foo',
           resource_type: 'file',
           mode: 'warning',
@@ -395,8 +410,8 @@ describe deferred_resources_type do
             'owner'   => nil,
             'group'   => nil,
             'content' => {
-              'invalidates' => ['source']
-            }
+              'invalidates' => ['source'],
+            },
           },
           resources: {
             '/tmp/test' => {
@@ -405,25 +420,28 @@ describe deferred_resources_type do
               'group'   => 'alice',
               'content' => 'Some stuff',
               # This should be ignored
-              'mode'    => '0777'
-            }
+              'mode'    => '0777',
+            },
           },
         )
 
-        @catalog.create_resource('File', {
-                                   'name' => '/tmp/test',
-          'ensure'  => 'file',
-          'owner'   => 'root',
-          'group'   => 'root',
-          'source' => 'puppet:///my.server/test',
-          'mode' => '0644'
-                                 })
+        catalog.create_resource(
+          'File',
+          {
+            'name'   => '/tmp/test',
+            'ensure' => 'file',
+            'owner'  => 'root',
+            'group'  => 'root',
+            'source' => 'puppet:///my.server/test',
+            'mode'   => '0644',
+          },
+        )
 
         expect(Puppet).to receive(:send).with(:warning, %(deferred_resources: Would have overridden attributes 'owner', 'group', 'content' on existing resource File[/tmp/test])).once
 
-        @resource.autorequire
+        resource.autorequire
 
-        result = @catalog.resource('File[/tmp/test]')
+        result = catalog.resource('File[/tmp/test]')
 
         expect(result[:owner]).to eq('root')
         expect(result[:group]).to eq('root')
