@@ -7,8 +7,8 @@ file_array = [
 
 file_hash = {
   '/tmp/file3' => {
-    'owner' => 'bob'
-  }
+    'owner' => 'bob',
+  },
 }
 
 describe 'deferred_resources::files' do
@@ -20,9 +20,7 @@ describe 'deferred_resources::files' do
   context 'supported operating systems' do
     on_supported_os.each do |os, os_facts|
       context "on #{os}" do
-        let(:facts) do
-          os_facts
-        end
+        let(:facts) { os_facts }
 
         context 'deferred_resources class without any parameters' do
           let(:params) { {} }
@@ -35,10 +33,10 @@ describe 'deferred_resources::files' do
         context 'with parameters set' do
           let(:params) do
             {
-              'remove' => file_array,
-           'install'   => file_hash,
-           'mode'      => 'enforcing',
-           'log_level' => 'debug'
+              'remove'    => file_array,
+              'install'   => file_hash,
+              'mode'      => 'enforcing',
+              'log_level' => 'debug',
             }
           end
 
@@ -53,23 +51,23 @@ describe 'deferred_resources::files' do
           it { is_expected.to compile.with_all_deps }
 
           it {
-            is_expected.to contain_deferred_resources('deferred_resources File remove').with({
-                                                                                               'resource_type' => 'file',
-            'resources'       => params['remove'],
-            'mode'            => params['mode'],
-            'default_options' => { 'ensure' => 'absent' },
-            'log_level'       => params['log_level']
-                                                                                             })
+            is_expected.to contain_deferred_resources('deferred_resources File remove').with(
+              'resource_type'   => 'file',
+              'resources'       => params['remove'],
+              'mode'            => params['mode'],
+              'default_options' => { 'ensure' => 'absent' },
+              'log_level'       => params['log_level'],
+            )
           }
 
           it {
-            is_expected.to contain_deferred_resources('deferred_resources File install').with({
-                                                                                                'resource_type' => 'file',
-            'resources'       => install_hash,
-            'mode'            => params['mode'],
-            'default_options' => { 'ensure' => 'present' },
-            'log_level'       => params['log_level']
-                                                                                              })
+            is_expected.to contain_deferred_resources('deferred_resources File install').with(
+              'resource_type' => 'file',
+              'resources'       => install_hash,
+              'mode'            => params['mode'],
+              'default_options' => { 'ensure' => 'present' },
+              'log_level'       => params['log_level'],
+            )
           }
         end
       end

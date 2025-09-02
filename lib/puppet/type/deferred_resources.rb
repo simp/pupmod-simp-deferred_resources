@@ -1,27 +1,27 @@
 Puppet::Type.newtype(:deferred_resources) do
-  @doc = <<-EOM
-      *** DANGER ***
+  @doc = <<~EOM
+    *** DANGER ***
 
-      THIS RESOURCE TYPE DOES THINGS THAT MAY BE CONFUSING MAKE SURE YOU FULLY
-      UNDERSTAND HOW IT WORKS PRIOR TO USING IT
+    THIS RESOURCE TYPE DOES THINGS THAT MAY BE CONFUSING MAKE SURE YOU FULLY
+    UNDERSTAND HOW IT WORKS PRIOR TO USING IT
 
-      *** DANGER ***
+    *** DANGER ***
 
-      WARNING: This type is **NOT** meant to be called directly. Please use the
-      helper classes in the module.
+    WARNING: This type is **NOT** meant to be called directly. Please use the
+    helper classes in the module.
 
-      This type will process after the catalog has been compiled but before it
-      is applied.  It takes a list of resources and checks for the existence of
-      that resource in the compiled catalog. If the resource has already been
-      defined in the catalog, it prints out a message that an action will
-      not be performed.
+    This type will process after the catalog has been compiled but before it
+    is applied.  It takes a list of resources and checks for the existence of
+    that resource in the compiled catalog. If the resource has already been
+    defined in the catalog, it prints out a message that an action will
+    not be performed.
 
-      If mode is set to `warning`, instead of adding resources to the catalog,
-      it prints out a list of resources that would have been added.
+    If mode is set to `warning`, instead of adding resources to the catalog,
+    it prints out a list of resources that would have been added.
   EOM
 
   newparam(:name) do
-    desc <<-EOM
+    desc <<~EOM
       Unique name for this resource.
     EOM
 
@@ -29,7 +29,7 @@ Puppet::Type.newtype(:deferred_resources) do
   end
 
   newparam(:default_options) do
-    desc <<-EOM
+    desc <<~EOM
       A Hash of options to be used for all resources.
     EOM
 
@@ -43,7 +43,7 @@ Puppet::Type.newtype(:deferred_resources) do
   end
 
   newparam(:resource_type) do
-    desc <<-EOM
+    desc <<~EOM
       The type of Puppet resource that will be passed in :resources
     EOM
 
@@ -51,7 +51,7 @@ Puppet::Type.newtype(:deferred_resources) do
   end
 
   newparam(:resources) do
-    desc <<-EOM
+    desc <<~EOM
       A Hash or Array of resources to add to the catalog.
     EOM
 
@@ -78,16 +78,16 @@ Puppet::Type.newtype(:deferred_resources) do
     end
 
     validate do |value|
-      unless  value.is_a?(Hash) || value.is_a?(Array)
+      unless value.is_a?(Hash) || value.is_a?(Array)
         raise Puppet::Error, 'Expecting a Hash or Array for :resources'
       end
     end
   end
 
   newparam(:override_existing_attributes) do
-    desc <<-EOM
-     A Hash or Array of items that should be updated on existing attributes if
-     they exist.
+    desc <<~EOM
+      A Hash or Array of items that should be updated on existing attributes if
+      they exist.
 
       This is basically a controlled resource collector and absolutely must not
       be taken lightly when used since it will affect existing resources in
@@ -143,7 +143,7 @@ Puppet::Type.newtype(:deferred_resources) do
   end
 
   newparam(:log_level) do
-    desc <<-EOM
+    desc <<~EOM
       Set the message log level for notifications.
     EOM
     defaultto(:warning)
@@ -152,7 +152,7 @@ Puppet::Type.newtype(:deferred_resources) do
   end
 
   newparam(:mode) do
-    desc <<-EOM
+    desc <<~EOM
       `enforcing` => Actually add the resource to the catalog post-compilation
       `warning`   => Tell the user what would be done but do not actually alter
                      the catalog.
@@ -223,7 +223,7 @@ Puppet::Type.newtype(:deferred_resources) do
           Puppet.debug("deferred_resources: Ignoring existing resource #{resource_log_name}")
         else
           Puppet.send(self[:log_level],
-"deferred_resources: Existing resource '#{resource_log_name}' at '#{existing_resource.file}:#{existing_resource.line}' has options that differ from deferred_resources::<x> parameters")
+            "deferred_resources: Existing resource '#{resource_log_name}' at '#{existing_resource.file}:#{existing_resource.line}' has options that differ from deferred_resources::<x> parameters")
         end
       else
         opts_minus_name = opts.dup

@@ -6,7 +6,7 @@ user_array = [
 ]
 
 user_hash = {
-  'user3' => {}
+  'user3' => {},
 }
 
 describe 'deferred_resources::users' do
@@ -16,11 +16,9 @@ describe 'deferred_resources::users' do
   end
 
   context 'supported operating systems' do
-    on_supported_os.each do |os, facts|
+    on_supported_os.each do |os, os_facts|
       context "on #{os}" do
-        let(:facts) do
-          facts
-        end
+        let(:facts) { os_facts }
 
         context 'deferred_resources class without any parameters' do
           let(:params) { {} }
@@ -33,10 +31,10 @@ describe 'deferred_resources::users' do
         context 'with parameters set' do
           let(:params) do
             {
-              'remove' => user_array,
-           'install'   => user_hash,
-           'mode'      => 'enforcing',
-           'log_level' => 'debug'
+              'remove'    => user_array,
+              'install'   => user_hash,
+              'mode'      => 'enforcing',
+              'log_level' => 'debug',
             }
           end
 
@@ -51,23 +49,23 @@ describe 'deferred_resources::users' do
           it { is_expected.to compile.with_all_deps }
 
           it {
-            is_expected.to contain_deferred_resources('deferred_resources User remove').with({
-                                                                                               'resource_type' => 'user',
-            'resources'       => params['remove'],
-            'mode'            => params['mode'],
-            'default_options' => { 'ensure' => 'absent' },
-            'log_level'       => params['log_level']
-                                                                                             })
+            is_expected.to contain_deferred_resources('deferred_resources User remove').with(
+              'resource_type'   => 'user',
+              'resources'       => params['remove'],
+              'mode'            => params['mode'],
+              'default_options' => { 'ensure' => 'absent' },
+              'log_level'       => params['log_level'],
+            )
           }
 
           it {
-            is_expected.to contain_deferred_resources('deferred_resources User install').with({
-                                                                                                'resource_type' => 'user',
-            'resources'       => install_hash,
-            'mode'            => params['mode'],
-            'default_options' => { 'ensure' => 'present' },
-            'log_level'       => params['log_level']
-                                                                                              })
+            is_expected.to contain_deferred_resources('deferred_resources User install').with(
+              'resource_type'   => 'user',
+              'resources'       => install_hash,
+              'mode'            => params['mode'],
+              'default_options' => { 'ensure' => 'present' },
+              'log_level'       => params['log_level'],
+            )
           }
         end
       end

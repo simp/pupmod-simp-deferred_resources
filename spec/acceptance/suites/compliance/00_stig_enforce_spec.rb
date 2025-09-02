@@ -4,33 +4,33 @@ test_name 'deferred_resources class STIG'
 
 describe 'deferred_resources class STIG' do
   let(:manifest) do
-    <<-EOS
+    <<~EOS
       include 'deferred_resources'
     EOS
   end
 
   let(:hieradata) do
-    <<-EOM
----
-compliance_markup::enforcement:
-  - disa_stig
+    <<~EOM
+      ---
+      compliance_markup::enforcement:
+        - disa_stig
     EOM
   end
 
   hosts.each do |host|
     context "on #{host}" do
       let(:hiera_yaml) do
-        <<-EOM
----
-version: 5
-hierarchy:
-  - name: Common
-    path: common.yaml
-  - name: Compliance
-    lookup_key: compliance_markup::enforcement
-defaults:
-  data_hash: yaml_data
-  datadir: "#{hiera_datadir(host)}"
+        <<~EOM
+          ---
+          version: 5
+          hierarchy:
+            - name: Common
+              path: common.yaml
+            - name: Compliance
+              lookup_key: compliance_markup::enforcement
+          defaults:
+            data_hash: yaml_data
+            datadir: "#{hiera_datadir(host)}"
         EOM
       end
 

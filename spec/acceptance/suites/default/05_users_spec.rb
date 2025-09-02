@@ -4,7 +4,7 @@ test_name 'deferred user resources'
 
 describe 'deferred user resources' do
   let(:manifest) do
-    <<-EOS
+    <<~EOS
       user { 'pete': ensure => 'present' }
       user { 'sad_panda': ensure => 'absent' }
 
@@ -12,21 +12,21 @@ describe 'deferred user resources' do
     EOS
   end
   let(:hieradata) do
-    <<-EOD
----
-deferred_resources::users::remove:
-  - 'oh_the_humanity'
-  - 'pete'
-deferred_resources::users::install:
-  - 'sad_panda'
-  - 'hello_there'
+    <<~EOD
+      ---
+      deferred_resources::users::remove:
+        - 'oh_the_humanity'
+        - 'pete'
+      deferred_resources::users::install:
+        - 'sad_panda'
+        - 'hello_there'
     EOD
   end
 
   let(:hieradata_enforce) do
-    <<-EOM
-deferred_resources::mode: 'enforcing'
-deferred_resources::log_level: 'debug'
+    <<~EOM
+      deferred_resources::mode: 'enforcing'
+      deferred_resources::log_level: 'debug'
     EOM
   end
 

@@ -155,8 +155,8 @@ describe deferred_resources_type do
           resource_type: 'package',
           resources: {
             'mypackage' => {
-              'ensure' => 'installed'
-            }
+              'ensure' => 'installed',
+            },
           },
           mode: 'enforcing',
         )
@@ -182,8 +182,8 @@ describe deferred_resources_type do
                 'group'   => 'alice',
                 'content' => 'Some stuff',
                 # This should be ignored
-                'mode'    => '0777'
-              }
+                'mode'    => '0777',
+              },
             },
           )
         end
@@ -254,8 +254,8 @@ describe deferred_resources_type do
               'owner'   => nil,
               'group'   => nil,
               'content' => {
-                'invalidates' => ['source']
-              }
+                'invalidates' => ['source'],
+              },
             },
             resources: {
               '/tmp/test' => {
@@ -264,8 +264,8 @@ describe deferred_resources_type do
                 'group'   => 'alice',
                 'content' => 'Some stuff',
                 # This should be ignored
-                'mode'    => '0777'
-              }
+                'mode'    => '0777',
+              },
             },
           )
 
@@ -348,13 +348,13 @@ describe deferred_resources_type do
                 'owner'   => nil,
                 'group'   => nil,
                 'content' => {
-                  'watermelons' => ['cheese']
-                }
+                  'watermelons' => ['cheese'],
+                },
               },
               resources: {
                 '/tmp/test' => {
-                  'mode' => '0777'
-                }
+                  'mode' => '0777',
+                },
               },
             )
           }.to raise_error(%r{Unknown control options 'watermelons'})

@@ -4,7 +4,7 @@ test_name 'deferred file resources'
 
 describe 'deferred file resources' do
   let(:manifest) do
-    <<-EOS
+    <<~EOS
       file { '/tmp/rm_file2': ensure => 'file', content => 'Test RM' }
       file { '/tmp/add_file1': ensure => 'absent' }
       file { '/tmp/add_file3': ensure => 'file', content => 'Test Add', mode => '0600' }
@@ -14,39 +14,39 @@ describe 'deferred file resources' do
     EOS
   end
   let(:hieradata) do
-    <<-EOD
----
-deferred_resources::files::remove:
-  - '/tmp/rm_file1'
-  - '/tmp/rm_file2'
-deferred_resources::files::install:
-  '/tmp/add_file1':
-    'mode': '0777'
-  '/tmp/add_file2':
-    'mode': '0600'
+    <<~EOD
+      ---
+      deferred_resources::files::remove:
+        - '/tmp/rm_file1'
+        - '/tmp/rm_file2'
+      deferred_resources::files::install:
+        '/tmp/add_file1':
+          'mode': '0777'
+        '/tmp/add_file2':
+          'mode': '0600'
     EOD
   end
 
   let(:hieradata_enforce) do
-    <<-EOM
-deferred_resources::mode: 'enforcing'
-deferred_resources::log_level: 'debug'
+    <<~EOM
+      deferred_resources::mode: 'enforcing'
+      deferred_resources::log_level: 'debug'
     EOM
   end
 
   # This is meant to be slapped onto the bottom of 'hieradata'
   let(:hieradata_resource_override) do
-    <<-EOM
-  '/tmp/add_file3':
-    'mode': '0644'
-    'content': 'Changed'
-  '/tmp/add_file4':
-    'mode': '0644'
-    'content': 'Changed'
-    'seltype': 'system_map_t'
-deferred_resources::mode: 'enforcing'
-deferred_resources::log_level: 'debug'
-deferred_resources::files::update_existing_resources: true
+    <<~EOM
+        '/tmp/add_file3':
+          'mode': '0644'
+          'content': 'Changed'
+        '/tmp/add_file4':
+          'mode': '0644'
+          'content': 'Changed'
+          'seltype': 'system_map_t'
+      deferred_resources::mode: 'enforcing'
+      deferred_resources::log_level: 'debug'
+      deferred_resources::files::update_existing_resources: true
     EOM
   end
 

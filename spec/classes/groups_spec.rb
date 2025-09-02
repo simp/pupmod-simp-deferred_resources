@@ -6,7 +6,7 @@ group_array = [
 ]
 
 group_hash = {
-  'group3' => {}
+  'group3' => {},
 }
 
 describe 'deferred_resources::groups' do
@@ -16,11 +16,9 @@ describe 'deferred_resources::groups' do
   end
 
   context 'supported operating systems' do
-    on_supported_os.each do |os, facts|
+    on_supported_os.each do |os, os_facts|
       context "on #{os}" do
-        let(:facts) do
-          facts
-        end
+        let(:facts) { os_facts }
 
         context 'deferred_resources class without any parameters' do
           let(:params) { {} }
@@ -33,10 +31,10 @@ describe 'deferred_resources::groups' do
         context 'with parameters set' do
           let(:params) do
             {
-              'remove' => group_array,
-           'install'   => group_hash,
-           'mode'      => 'enforcing',
-           'log_level' => 'debug'
+              'remove'    => group_array,
+              'install'   => group_hash,
+              'mode'      => 'enforcing',
+              'log_level' => 'debug',
             }
           end
 
@@ -51,23 +49,23 @@ describe 'deferred_resources::groups' do
           it { is_expected.to compile.with_all_deps }
 
           it {
-            is_expected.to contain_deferred_resources('deferred_resources Group remove').with({
-                                                                                                'resource_type' => 'group',
-            'resources'       => params['remove'],
-            'mode'            => params['mode'],
-            'default_options' => { 'ensure' => 'absent' },
-            'log_level'       => params['log_level']
-                                                                                              })
+            is_expected.to contain_deferred_resources('deferred_resources Group remove').with(
+              'resource_type'   => 'group',
+              'resources'       => params['remove'],
+              'mode'            => params['mode'],
+              'default_options' => { 'ensure' => 'absent' },
+              'log_level'       => params['log_level'],
+            )
           }
 
           it {
-            is_expected.to contain_deferred_resources('deferred_resources Group install').with({
-                                                                                                 'resource_type' => 'group',
-            'resources'       => install_hash,
-            'mode'            => params['mode'],
-            'default_options' => { 'ensure' => 'present' },
-            'log_level'       => params['log_level']
-                                                                                               })
+            is_expected.to contain_deferred_resources('deferred_resources Group install').with(
+              'resource_type'   => 'group',
+              'resources'       => install_hash,
+              'mode'            => params['mode'],
+              'default_options' => { 'ensure' => 'present' },
+              'log_level'       => params['log_level'],
+            )
           }
         end
       end

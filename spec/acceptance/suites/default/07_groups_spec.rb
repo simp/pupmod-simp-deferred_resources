@@ -4,7 +4,7 @@ test_name 'deferred group resources'
 
 describe 'deferred group resources' do
   let(:manifest) do
-    <<-EOS
+    <<~EOS
       group { 'pete_group': ensure => 'present' }
       group { 'sad_panda_group': ensure => 'absent' }
 
@@ -12,21 +12,21 @@ describe 'deferred group resources' do
     EOS
   end
   let(:hieradata) do
-    <<-EOD
----
-deferred_resources::groups::remove:
-  - 'oh_the_humanity_group'
-  - 'pete_group'
-deferred_resources::groups::install:
-  - 'sad_panda_group'
-  - 'hello_there_group'
+    <<~EOD
+      ---
+      deferred_resources::groups::remove:
+        - 'oh_the_humanity_group'
+        - 'pete_group'
+      deferred_resources::groups::install:
+        - 'sad_panda_group'
+        - 'hello_there_group'
     EOD
   end
 
   let(:hieradata_enforce) do
-    <<-EOM
-deferred_resources::mode: 'enforcing'
-deferred_resources::log_level: 'debug'
+    <<~EOM
+      deferred_resources::mode: 'enforcing'
+      deferred_resources::log_level: 'debug'
     EOM
   end
 

@@ -4,7 +4,7 @@ test_name 'deferred package resources'
 
 describe 'deferred package resources' do
   let(:manifest) do
-    <<-EOS
+    <<~EOS
       package { 'tmpwatch':  ensure => 'absent'}
       package { 'dos2unix':  ensure => 'installed'}
 
@@ -12,23 +12,23 @@ describe 'deferred package resources' do
     EOS
   end
   let(:hieradata) do
-    <<-EOD
----
-deferred_resources::packages::remove:
-  'ypserv': ~
-  'dos2unix': ~
-  'vsftpd': ~
-deferred_resources::packages::install:
-  - 'tmpwatch'
-  - 'zsh'
-deferred_resources::packages::install_ensure: 'present'
+    <<~EOD
+      ---
+      deferred_resources::packages::remove:
+        'ypserv': ~
+        'dos2unix': ~
+        'vsftpd': ~
+      deferred_resources::packages::install:
+        - 'tmpwatch'
+        - 'zsh'
+      deferred_resources::packages::install_ensure: 'present'
     EOD
   end
 
   let(:hieradata_enforce) do
-    <<-EOM
-deferred_resources::mode: 'enforcing'
-deferred_resources::log_level: 'debug'
+    <<~EOM
+      deferred_resources::mode: 'enforcing'
+      deferred_resources::log_level: 'debug'
     EOM
   end
 
