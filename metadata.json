@@ -1,6 +1,6 @@
 {
   "name": "simp-deferred_resources",
-  "version": "0.8.1",
+  "version": "1.0.0",
   "author": "simp",
   "summary": "This module creates custom types used to add resources to the catalog after the compilation of the manifests",
   "license": "Apache-2.0",
