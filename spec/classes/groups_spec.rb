@@ -1,15 +1,19 @@
 require 'spec_helper'
 
-group_array = [
-  'group1',
-  'group2',
-]
-
-group_hash = {
-  'group3' => {},
-}
-
 describe 'deferred_resources::groups' do
+  let(:group_array) do
+    [
+      'group1',
+      'group2',
+    ]
+  end
+
+  let(:group_hash) do
+    {
+      'group3' => {},
+    }
+  end
+
   shared_examples_for 'a structured module' do
     it { is_expected.to compile.with_all_deps }
     it { is_expected.to create_class('deferred_resources') }

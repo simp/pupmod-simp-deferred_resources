@@ -1,17 +1,21 @@
 require 'spec_helper'
 
-file_array = [
-  '/tmp/file1',
-  '/tmp/file2',
-]
-
-file_hash = {
-  '/tmp/file3' => {
-    'owner' => 'bob',
-  },
-}
-
 describe 'deferred_resources::files' do
+  let(:file_array) do
+    [
+      '/tmp/file1',
+      '/tmp/file2',
+    ]
+  end
+
+  let(:file_hash) do
+    {
+      '/tmp/file3' => {
+        'owner' => 'bob',
+      },
+    }
+  end
+
   shared_examples_for 'a structured module' do
     it { is_expected.to compile.with_all_deps }
     it { is_expected.to create_class('deferred_resources') }

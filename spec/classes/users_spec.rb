@@ -1,15 +1,19 @@
 require 'spec_helper'
 
-user_array = [
-  'user1',
-  'user2',
-]
-
-user_hash = {
-  'user3' => {},
-}
-
 describe 'deferred_resources::users' do
+  let(:user_array) do
+    [
+      'user1',
+      'user2',
+    ]
+  end
+
+  let(:user_hash) do
+    {
+      'user3' => {},
+    }
+  end
+
   shared_examples_for 'a structured module' do
     it { is_expected.to compile.with_all_deps }
     it { is_expected.to create_class('deferred_resources') }
