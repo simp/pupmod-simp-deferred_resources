@@ -1,16 +1,20 @@
 require 'spec_helper'
 
-package_array = [
-  'pkg1',
-  'pkg2',
-]
-
-package_hash = {
-  'pkg3' => { 'install_options' => 'stuff' },
-  'pkg4' => {},
-}
-
 describe 'deferred_resources::packages' do
+  let(:package_array) do
+    [
+      'pkg1',
+      'pkg2',
+    ]
+  end
+
+  let(:package_hash) do
+    {
+      'pkg3' => { 'install_options' => 'stuff' },
+      'pkg4' => {},
+    }
+  end
+
   shared_examples_for 'a structured module' do
     it { is_expected.to compile.with_all_deps }
     it { is_expected.to create_class('deferred_resources') }

@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-deferred_resources_type = Puppet::Type.type(:deferred_resources)
+describe Puppet::Type.type(:deferred_resources) do
+  let(:deferred_resources_type) { described_class }
 
-describe deferred_resources_type do
   context 'when setting parameters' do
     context ':resource_type' do
       it 'fails if not passed' do
