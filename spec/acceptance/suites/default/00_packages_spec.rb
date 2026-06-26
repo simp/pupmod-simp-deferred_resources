@@ -15,7 +15,7 @@ describe 'deferred package resources' do
     <<~EOD
       ---
       deferred_resources::packages::remove:
-        'ypserv': ~
+        'telnet': ~
         'dos2unix': ~
         'vsftpd': ~
       deferred_resources::packages::install:
@@ -36,7 +36,7 @@ describe 'deferred package resources' do
     hosts.each do |host|
       context 'with default parameters' do
         it 'works with no errors' do
-          install_package host, 'ypserv'
+          install_package host, 'telnet'
           apply_manifest_on(host, manifest, catch_failures: true)
         end
 
@@ -51,7 +51,7 @@ describe 'deferred package resources' do
           end
 
           # previously installed package and package with ensure present
-          ['ypserv', 'dos2unix'].each do |pkg|
+          ['telnet', 'dos2unix'].each do |pkg|
             expect(host.check_for_package(pkg)).to eq true
           end
         end
@@ -63,7 +63,7 @@ describe 'deferred package resources' do
         end
 
         it 'outputs messages but not install or remove packages' do
-          install_package host, 'ypserv'
+          install_package host, 'telnet'
           result = apply_manifest_on(host, manifest, accept_all_exit_codes: true)
 
           # packages ignored by deferred_resources because they are already in the catalogue
@@ -72,7 +72,7 @@ describe 'deferred package resources' do
           end
 
           # packages that are only in deferred_resources::packages::remove
-          ['vsftpd', 'ypserv'].each do |pkg|
+          ['vsftpd', 'telnet'].each do |pkg|
             expect(result.stdout).to match(%r{Would have created Package\[#{pkg}\] with .*:ensure=>"absent"}m)
           end
 
@@ -90,7 +90,7 @@ describe 'deferred package resources' do
 
           # 1 package that would have been removed by deferred_resources and
           # 1 package installed by another catalog resource
-          ['ypserv', 'dos2unix'].each do |pkg|
+          ['telnet', 'dos2unix'].each do |pkg|
             expect(host.check_for_package(pkg)).to eq true
           end
         end
@@ -102,7 +102,7 @@ describe 'deferred package resources' do
         end
 
         it 'does not output messages when the manifest it applied' do
-          install_package host, 'ypserv'
+          install_package host, 'telnet'
           result = apply_manifest_on(host, manifest, accept_all_exit_codes: true)
 
           # packages ignored by deferred_resources because they are already in the catalogue
@@ -112,7 +112,7 @@ describe 'deferred package resources' do
 
           # packages that are only in deferred_resources::packages::remove or
           # deferred_resources::packages::install
-          ['vsftpd', 'ypserv', 'zsh'].each do |pkg|
+          ['vsftpd', 'telnet', 'zsh'].each do |pkg|
             expect(result.stdout).not_to match(%r{Would have created Package\[#{pkg}\]}m)
           end
         end
@@ -120,7 +120,7 @@ describe 'deferred package resources' do
         it 'has removed and installed packages' do
           # 1st package removed by another catalog resource and 2 remaining packages
           # removed by deferred_resources
-          ['tmpwatch', 'ypserv', 'vsftpd'].each do |pkg|
+          ['tmpwatch', 'telnet', 'vsftpd'].each do |pkg|
             expect(host.check_for_package(pkg)).to eq false
           end
 
