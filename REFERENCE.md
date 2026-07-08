@@ -376,7 +376,7 @@ The following parameters are available in the `deferred_resources` type.
 
 A Hash of options to be used for all resources.
 
-Default value: `Hash.new`
+Default value: `{}`
 
 ##### <a name="-deferred_resources--log_level"></a>`log_level`
 
@@ -407,23 +407,23 @@ Unique name for this resource.
 A Hash or Array of items that should be updated on existing attributes if
 they exist.
 
- This is basically a controlled resource collector and absolutely must not
- be taken lightly when used since it will affect existing resources in
- your catalog.
+This is basically a controlled resource collector and absolutely must not
+be taken lightly when used since it will affect existing resources in
+your catalog.
 
- If you want to be explicit, use a Resource Collector and do not set this.
+If you want to be explicit, use a Resource Collector and do not set this.
 
- If a Hash is passed, each key is the attribute that can be overridden and
- an optional hash of options can be passed with the following meanings.
+If a Hash is passed, each key is the attribute that can be overridden and
+an optional hash of options can be passed with the following meanings.
 
-   * 'invalidates':
-     * An Array of entries that this particular parameter invalidates.
-       This means that the items in the list will be set to `nil` in the
-       overridden resource.
+  * 'invalidates':
+    * An Array of entries that this particular parameter invalidates.
+      This means that the items in the list will be set to `nil` in the
+      overridden resource.
 
 ##### <a name="-deferred_resources--resource_type"></a>`resource_type`
 
-Valid values: `/.+/`
+Valid values: `%r{.+}`
 
 The type of Puppet resource that will be passed in :resources
 
