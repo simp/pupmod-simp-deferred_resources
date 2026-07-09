@@ -53,9 +53,8 @@ class deferred_resources::packages (
   Simplib::PuppetLogLevel              $log_level       = $deferred_resources::log_level
 
 ) inherits deferred_resources {
-
   unless empty($remove) {
-    deferred_resources{ "${module_name} Package remove":
+    deferred_resources { "${module_name} Package remove":
       resources       => $remove,
       resource_type   => 'package',
       default_options => $default_options + { 'ensure' => $remove_ensure },
@@ -65,7 +64,7 @@ class deferred_resources::packages (
   }
 
   unless empty($install) {
-    deferred_resources{ "${module_name} Package install":
+    deferred_resources { "${module_name} Package install":
       resources       => $install,
       resource_type   => 'package',
       default_options => $default_options + { 'ensure' => $install_ensure },

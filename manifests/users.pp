@@ -30,9 +30,8 @@ class deferred_resources::users (
   Simplib::PuppetLogLevel         $log_level = $deferred_resources::log_level
 
 ) inherits deferred_resources {
-
   unless empty($remove) {
-    deferred_resources{ "${module_name} User remove":
+    deferred_resources { "${module_name} User remove":
       resources       => $remove,
       resource_type   => 'user',
       default_options => { 'ensure' => 'absent' },
@@ -42,7 +41,7 @@ class deferred_resources::users (
   }
 
   unless empty($install) {
-    deferred_resources{ "${module_name} User install":
+    deferred_resources { "${module_name} User install":
       resources       => $install,
       resource_type   => 'user',
       default_options => { 'ensure' => 'present' },

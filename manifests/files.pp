@@ -44,7 +44,6 @@ class deferred_resources::files (
   Simplib::PuppetLogLevel          $log_level                 = $deferred_resources::log_level
 
 ) inherits deferred_resources {
-
   if $update_existing_resources {
     $_override_existing_attributes = {
       'owner'   => undef,
@@ -60,7 +59,7 @@ class deferred_resources::files (
   }
 
   unless empty($remove) {
-    deferred_resources{ "${module_name} File remove":
+    deferred_resources { "${module_name} File remove":
       resources       => $remove,
       resource_type   => 'file',
       default_options => { 'ensure' => 'absent' },
@@ -70,7 +69,7 @@ class deferred_resources::files (
   }
 
   unless empty($install) {
-    deferred_resources{ "${module_name} File install":
+    deferred_resources { "${module_name} File install":
       resources                    => $install,
       resource_type                => 'file',
       default_options              => { 'ensure' => 'present' },

@@ -30,9 +30,8 @@ class deferred_resources::groups (
   Simplib::PuppetLogLevel         $log_level = $deferred_resources::log_level
 
 ) inherits deferred_resources {
-
   unless empty($remove) {
-    deferred_resources{ "${module_name} Group remove":
+    deferred_resources { "${module_name} Group remove":
       resources       => $remove,
       resource_type   => 'group',
       default_options => { 'ensure' => 'absent' },
@@ -42,7 +41,7 @@ class deferred_resources::groups (
   }
 
   unless empty($install) {
-    deferred_resources{ "${module_name} Group install":
+    deferred_resources { "${module_name} Group install":
       resources       => $install,
       resource_type   => 'group',
       default_options => { 'ensure' => 'present' },
