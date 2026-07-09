@@ -58,7 +58,7 @@ instances of that type.
   `$auto_include` (`Boolean`, default `true`) includes the four sub-classes;
   `$mode` (`Enum['warning','enforcing']`, default `'warning'`) and `$log_level`
   (`Simplib::PuppetLogLevel`, default `'info'`) are the module-wide defaults
-  inherited by the sub-classes. Including the class is safe by default because
+  inherited by the sub-classes. (The custom *type* parameter `:log_level` defaults to `:warning`, but the public class `$log_level` defaults to `'info'`, so the effective log level for a plain `include deferred_resources` is `info`.) Including the class is safe by default because
   the sub-classes do nothing until given resources and `mode` is `enforcing`.
 
 - **`deferred_resources::packages` (`manifests/packages.pp`)** —
