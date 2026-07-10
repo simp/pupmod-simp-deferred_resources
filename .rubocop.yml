@@ -697,3 +697,8 @@ Style/StringChars:
   Enabled: false
 Style/SwapValues:
   Enabled: false
+# rubocop 1.85 (pinned by voxpupuli-test) lacks the spec/test exclude this cop
+# gained by default in rubocop 1.86; mirror the upstream default here
+Style/OneClassPerFile:
+  Exclude:
+    - "spec/**/*"
