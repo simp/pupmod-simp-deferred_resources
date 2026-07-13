@@ -24,7 +24,6 @@ class deferred_resources (
   Enum['warning','enforcing'] $mode         = 'warning',
   Simplib::PuppetLogLevel     $log_level    = 'info'
 ) {
-
   if $auto_include {
     include 'deferred_resources::packages'
     include 'deferred_resources::users'

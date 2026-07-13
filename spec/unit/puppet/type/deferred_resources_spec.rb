@@ -394,7 +394,8 @@ describe Puppet::Type.type(:deferred_resources) do
           default_options: { 'ensure' => 'absent' },
         )
 
-        expect(Puppet).to receive(:send).with(:warning, 'deferred_resources: Would have created Package[mypackage] with {:ensure=>"absent"}').once
+        expected_opts = { ensure: 'absent' }
+        expect(Puppet).to receive(:send).with(:warning, "deferred_resources: Would have created Package[mypackage] with #{expected_opts}").once
 
         resource.autorequire
 
