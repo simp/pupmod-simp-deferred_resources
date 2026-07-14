@@ -9,34 +9,34 @@ describe 'deferred_resources class STIG' do
     EOS
   end
 
+  # A STIG-like enforcement policy expressed through the module's Hiera API
   let(:hieradata) do
     <<~EOM
       ---
-      compliance_markup::enforcement:
-        - disa_stig
+      deferred_resources::mode: 'enforcing'
+      deferred_resources::resources:
+        package:
+          telnet-server:
+            ensure: 'absent'
+          vsftpd:
+            ensure: 'absent'
+        user:
+          ftp:
+            ensure: 'absent'
+          games:
+            ensure: 'absent'
+        group:
+          ftp:
+            ensure: 'absent'
+          games:
+            ensure: 'absent'
     EOM
   end
 
   hosts.each do |host|
     context "on #{host}" do
-      let(:hiera_yaml) do
-        <<~EOM
-          ---
-          version: 5
-          hierarchy:
-            - name: Common
-              path: common.yaml
-            - name: Compliance
-              lookup_key: compliance_markup::enforcement
-          defaults:
-            data_hash: yaml_data
-            datadir: "#{hiera_datadir(host)}"
-        EOM
-      end
-
       it 'works with no errors' do
-        create_remote_file(host, host.puppet['hiera_config'], hiera_yaml)
-        write_hieradata_to(host, hieradata)
+        set_hieradata_on(host, hieradata)
 
         apply_manifest_on(host, manifest, catch_failures: true)
       end
