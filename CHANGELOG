@@ -1,3 +1,30 @@
+* Thu Jul 02 2026 Mike Riddle <mike@sicura.us> - 2.0.0
+- BREAKING: Replaced the `deferred_resources::packages`, `::users`,
+  `::groups`, and `::files` classes with a single `deferred_resources` class
+  that accepts a Hash of resources keyed by resource type
+  - Any native resource type may be used and any mix of resource types may be
+    passed in the same Hash
+  - A per-type `default_options` parameter replaces the per-class options
+  - The `auto_include` parameter has been removed
+  - Existing catalog resources can be overridden per resource by setting the
+    reserved `override: true` option on an entry; all attributes specified on
+    the entry are forced onto the existing resource and an attribute
+    explicitly set to undef (`~`) is removed from it (this replaces the old
+    `update_existing_resources`/`invalidates` mechanism)
+- Resource type names are case-normalized and duplicate type entries fail at
+  compile time instead of producing duplicate resource declarations
+- Entries that reference the same underlying resource via their title or an
+  explicit 'name' attribute fail at compile time instead of being processed
+  in a nondeterministic order
+- Fix a catalog failure (duplicate resource/alias error) when a deferred
+  resource's namevar collides with an existing catalog resource declared
+  under a different title
+- Unknown resource types are skipped with a log message instead of failing
+  the catalog run
+- Accept an empty options Hash for an attribute in
+  `override_existing_attributes` (previously raised while `nil` and the
+  Array form were accepted)
+
 * Thu Jul 09 2026 Steven Pritchard <steve@sicura.us> - 1.0.1
 - Resolved puppet-lint manifest whitespace offenses
 
