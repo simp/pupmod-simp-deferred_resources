@@ -1,4 +1,4 @@
-* Thu Jul 02 2026 Mike Riddle <mike@sicura.us> - 2.0.0
+* Tue Jul 14 2026 Mike Riddle <mike@sicura.us> - 2.0.0
 - BREAKING: Replaced the `deferred_resources::packages`, `::users`,
   `::groups`, and `::files` classes with a single `deferred_resources` class
   that accepts a Hash of resources keyed by resource type
