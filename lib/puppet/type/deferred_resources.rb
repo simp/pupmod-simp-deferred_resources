@@ -46,6 +46,10 @@ Puppet::Type.newtype(:deferred_resources) do
       unless value.is_a?(Hash)
         raise Puppet::Error, 'Expecting a Hash for :default_options'
       end
+
+      if value.key?('override') && ![true, false].include?(value['override'])
+        raise Puppet::Error, "The 'override' option in :default_options must be a Boolean"
+      end
     end
   end
 

@@ -82,6 +82,28 @@ describe Puppet::Type.type(:deferred_resources) do
           )
         }.to raise_error(%r{xpecting a Hash})
       end
+
+      it 'accepts a Boolean override option' do
+        resource = deferred_resources_type.new(
+          name: 'foo',
+          resource_type: 'package',
+          resources: ['mypackage'],
+          default_options: { 'override' => true },
+        )
+
+        expect(resource[:default_options]).to eq({ 'override' => true })
+      end
+
+      it 'fails on a non-Boolean override option' do
+        expect {
+          deferred_resources_type.new(
+            name: 'foo',
+            resource_type: 'package',
+            resources: ['mypackage'],
+            default_options: { 'override' => 'yes' },
+          )
+        }.to raise_error(%r{The 'override' option in :default_options must be a Boolean})
+      end
     end
 
     context ':log_level' do
@@ -294,6 +316,24 @@ describe Puppet::Type.type(:deferred_resources) do
           expect(pristine_result[:group]).to eq('root')
           expect(pristine_result.parameter(:content).actual_content).to eq('Test')
           expect(pristine_result[:mode]).to match(%r{^0?644$})
+        end
+
+        it 'honors an override set through default_options' do
+          defaulted_resource = deferred_resources_type.new(
+            name: 'foo',
+            resource_type: 'file',
+            mode: 'enforcing',
+            default_options: { 'override' => true },
+            resources: {
+              '/tmp/test' => {
+                'owner' => 'bob',
+              },
+            },
+          )
+
+          defaulted_resource.autorequire
+
+          expect(catalog.resource('File[/tmp/test]')[:owner]).to eq('bob')
         end
 
         it 'does not touch an existing resource when override is not set' do
