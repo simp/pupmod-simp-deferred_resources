@@ -88,6 +88,14 @@ class deferred_resources (
 
   $_default_options = Hash($default_options.map |$k, $v| { [downcase($k), $v] })
 
+  # The native type would only be able to report a bad control option at
+  # apply time, so catch it at compile time instead
+  $_default_options.each |$_type, $_opts| {
+    if ('override' in $_opts) and !($_opts['override'] =~ Boolean) {
+      fail("deferred_resources: The 'override' option in \$default_options for resource type '${_type}' must be a Boolean")
+    }
+  }
+
   $_resources.each |$_type, $_entries| {
     unless empty($_entries) {
       # The native type would only be able to report a bad control option at

@@ -190,6 +190,19 @@ describe 'deferred_resources' do
           }
         end
 
+        context 'with a non-Boolean override option in default_options' do
+          let(:params) do
+            {
+              'resources'       => { 'package' => { 'pkg1' => :undef } },
+              'default_options' => { 'package' => { 'override' => 'yes' } },
+            }
+          end
+
+          it {
+            is_expected.to compile.and_raise_error(%r{The 'override' option in \$default_options for resource type 'package' must be a Boolean})
+          }
+        end
+
         context 'with a resource type that has no entries' do
           let(:params) do
             {
