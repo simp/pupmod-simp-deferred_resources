@@ -6,11 +6,7 @@
 
 ### Classes
 
-* [`deferred_resources`](#deferred_resources)
-* [`deferred_resources::files`](#deferred_resources--files): This class takes an Array of file resources to remove, and a Hash of file resources to install.  After the entire puppet catalog has been com
-* [`deferred_resources::groups`](#deferred_resources--groups): This class takes an Array of group resources to remove, and a Hash of group resources to install.  After the entire puppet catalog has been c
-* [`deferred_resources::packages`](#deferred_resources--packages): This class takes two `Hashes` of packages, one to remove and one to install.  After the entire puppet catalog has been compiled, it will proc
-* [`deferred_resources::users`](#deferred_resources--users): This class takes an Array of user resources to remove, and a Hash of user resources to install.  After the entire puppet catalog has been com
+* [`deferred_resources`](#deferred_resources): **WARNING:** This module is intended to help meet common policy requirements for resources being either present or absent on a system and is 
 
 ### Resource types
 
@@ -20,23 +16,93 @@
 
 ### <a name="deferred_resources"></a>`deferred_resources`
 
-The deferred_resources class.
+**WARNING:** This module is intended to help meet common policy requirements
+for resources being either present or absent on a system and is not meant
+for general usage. Make sure you understand the ramifications of what this
+module does to the Puppet catalog prior to using it outside of the SIMP
+framework.
+
+This class takes a Hash of resources, keyed by resource type. After the
+entire puppet catalog has been compiled, any listed resource that is not
+already declared in the catalog will be added to the catalog.
+
+Resources that already exist in the catalog are never touched unless an
+entry sets the reserved `override` option to `true`, in which case only the
+attributes specified on that entry will be updated on the existing resource.
 
 #### Parameters
 
 The following parameters are available in the `deferred_resources` class:
 
+* [`resources`](#-deferred_resources--resources)
+* [`default_options`](#-deferred_resources--default_options)
 * [`mode`](#-deferred_resources--mode)
 * [`log_level`](#-deferred_resources--log_level)
-* [`auto_include`](#-deferred_resources--auto_include)
+
+##### <a name="-deferred_resources--resources"></a>`resources`
+
+Data type: `Hash[String[1], Hash[String[1], Optional[Hash]]]`
+
+A Hash of resources, keyed by resource type, to process after the catalog
+has been compiled
+
+* Any native resource type may be used and any mix of resource types may
+  be passed in the same Hash
+* Each entry is a Hash of resource titles to (optional) resource
+  attributes, exactly as you would declare the resource normally
+* The `override` attribute name is **reserved** as a control option and is
+  never passed to the underlying resource:
+
+  **DANGEROUS** - READ CAREFULLY
+
+  Setting `override: true` on an entry will force all of the attributes
+  specified on that entry onto a matching resource that **already exists**
+  in the catalog. An attribute explicitly set to `undef` (`~` in YAML)
+  will be *removed* from the existing resource (e.g. unsetting `source`
+  when specifying `content`). This is basically a controlled resource
+  collector and absolutely must not be taken lightly when used since it
+  will affect existing resources in your catalog. If you want to be
+  explicit, use a Resource Collector and do not set this.
+
+@example Ensure packages and users using Hieradata, overriding one file
+  deferred_resources::resources:
+    package:
+      telnet:
+        ensure: 'absent'
+      tmpwatch:
+        ensure: 'installed'
+    user:
+      ftp:
+        ensure: 'absent'
+    file:
+      /etc/motd:
+        ensure: 'file'
+        content: 'Authorized use only'
+        source: ~
+        override: true
+
+Default value: `{}`
+
+##### <a name="-deferred_resources--default_options"></a>`default_options`
+
+Data type: `Hash[String[1], Hash]`
+
+A Hash of attributes, keyed by resource type, that will be applied to
+every resource of that type in `$resources`
+
+* Attributes set directly on an entry in `$resources` take precedence
+* May include `override` to set the default override behavior for every
+  resource of a type
+
+Default value: `{}`
 
 ##### <a name="-deferred_resources--mode"></a>`mode`
 
 Data type: `Enum['warning','enforcing']`
 
-If set to `enforcing` then the management classses will take action on the
-system. If set to 'warning' a message will be printed noting what would
-have taken place on the system but the catalog will not be updated.
+If set to `enforcing` then this class will take action on the system. If
+set to `warning` a message will be printed noting what would have taken
+place on the system but the catalog will not be updated.
 
 Default value: `'warning'`
 
@@ -47,295 +113,6 @@ Data type: `Simplib::PuppetLogLevel`
 Set the log level for warning messages
 
 Default value: `'info'`
-
-##### <a name="-deferred_resources--auto_include"></a>`auto_include`
-
-Data type: `Boolean`
-
-
-
-Default value: `true`
-
-### <a name="deferred_resources--files"></a>`deferred_resources::files`
-
-This class takes an Array of file resources to remove, and a Hash of file
-resources to install.
-
-After the entire puppet catalog has been compiled, it will process both lists
-and, for any resource that is not already defined in the catalog, it will
-take the appropriate action.
-
-An exception will be raised if you list the same file in both lists.
-
-#### Parameters
-
-The following parameters are available in the `deferred_resources::files` class:
-
-* [`remove`](#-deferred_resources--files--remove)
-* [`install`](#-deferred_resources--files--install)
-* [`update_existing_resources`](#-deferred_resources--files--update_existing_resources)
-* [`mode`](#-deferred_resources--files--mode)
-* [`log_level`](#-deferred_resources--files--log_level)
-
-##### <a name="-deferred_resources--files--remove"></a>`remove`
-
-Data type: `Array[Stdlib::Absolutepath]`
-
-A list of files to remove.
-
-Default value: `[]`
-
-##### <a name="-deferred_resources--files--install"></a>`install`
-
-Data type: `Hash[Stdlib::Absolutepath, Hash]`
-
-A Hash of files to install.
-
-Default value: `{}`
-
-##### <a name="-deferred_resources--files--update_existing_resources"></a>`update_existing_resources`
-
-Data type: `Boolean`
-
-**DANGEROUS** - READ CAREFULLY
-
-Update the following attributes of resources that already exist in the
-catalog if set in the `install` Hash:
-
-  * user
-  * group
-  * content
-    * Will unset `source`
-
-If you wish to affect additional parameters on an existing resource in the
-catalog, you should not use this class and should instead use a Resource
-Collector.
-
-@see https://puppet.com/docs/puppet/5.3/lang_resources_advanced.html#amending-attributes-with-a-collector
-
-Default value: `false`
-
-##### <a name="-deferred_resources--files--mode"></a>`mode`
-
-Data type: `Enum['warning','enforcing']`
-
-@see `deferred_resources::mode`
-
-Default value: `$deferred_resources::mode`
-
-##### <a name="-deferred_resources--files--log_level"></a>`log_level`
-
-Data type: `Simplib::PuppetLogLevel`
-
-@see `deferred_resources::log_level`
-
-Default value: `$deferred_resources::log_level`
-
-### <a name="deferred_resources--groups"></a>`deferred_resources::groups`
-
-This class takes an Array of group resources to remove, and a Hash of group
-resources to install.
-
-After the entire puppet catalog has been compiled, it will process both lists
-and, for any resource that is not already defined in the catalog, it will
-take the appropriate action.
-
-An exception will be raised if you list the same group in both lists.
-
-#### Parameters
-
-The following parameters are available in the `deferred_resources::groups` class:
-
-* [`remove`](#-deferred_resources--groups--remove)
-* [`install`](#-deferred_resources--groups--install)
-* [`mode`](#-deferred_resources--groups--mode)
-* [`log_level`](#-deferred_resources--groups--log_level)
-
-##### <a name="-deferred_resources--groups--remove"></a>`remove`
-
-Data type: `Array[String[1]]`
-
-A list of groups to remove.
-
-Default value: `[]`
-
-##### <a name="-deferred_resources--groups--install"></a>`install`
-
-Data type: `Variant[Hash, Array[String[1]]]`
-
-A list of groups to install.
-
-* A `Hash` can be used to add extra attributes for the group, but the
-  `ensure` attribute will always be set to `absent` for removal and
-  `present` for creation.
-
-Default value: `{}`
-
-##### <a name="-deferred_resources--groups--mode"></a>`mode`
-
-Data type: `Enum['warning','enforcing']`
-
-@see `deferred_resources::mode`
-
-Default value: `$deferred_resources::mode`
-
-##### <a name="-deferred_resources--groups--log_level"></a>`log_level`
-
-Data type: `Simplib::PuppetLogLevel`
-
-@see `deferred_resources::log_level`
-
-Default value: `$deferred_resources::log_level`
-
-### <a name="deferred_resources--packages"></a>`deferred_resources::packages`
-
-This class takes two `Hashes` of packages, one to remove and one to install.
-
-After the entire puppet catalog has been compiled, it will process both lists
-and, for any resource that is not already defined in the catalog, it will
-take the appropriate action.
-
-An exception will be raised if you list the same package in both lists.
-
-#### Parameters
-
-The following parameters are available in the `deferred_resources::packages` class:
-
-* [`remove`](#-deferred_resources--packages--remove)
-* [`remove_ensure`](#-deferred_resources--packages--remove_ensure)
-* [`install`](#-deferred_resources--packages--install)
-* [`install_ensure`](#-deferred_resources--packages--install_ensure)
-* [`default_options`](#-deferred_resources--packages--default_options)
-* [`mode`](#-deferred_resources--packages--mode)
-* [`log_level`](#-deferred_resources--packages--log_level)
-
-##### <a name="-deferred_resources--packages--remove"></a>`remove`
-
-Data type: `Variant[Hash, Array]`
-
-A list of packages to remove.
-
-* A `Hash` can be used to add extra attributes for the package, but the
-  `ensure` attribute will be overwritten if it is included.
-
-Default value: `{}`
-
-##### <a name="-deferred_resources--packages--remove_ensure"></a>`remove_ensure`
-
-Data type: `Enum['absent','purged']`
-
-If removing, then this is the state that the packages should have.
-
-* This will be overridden by anything set in options applied to an entry in
-  the `$remove` Hash.
-
-Default value: `'absent'`
-
-##### <a name="-deferred_resources--packages--install"></a>`install`
-
-Data type: `Variant[Hash, Array]`
-
-A list of packages to install.
-
-* A `Hash` can be used to add extra attributes for the package, but the
-  `ensure` attribute will always be set to `$package_ensure`.
-
-Default value: `{}`
-
-##### <a name="-deferred_resources--packages--install_ensure"></a>`install_ensure`
-
-Data type: `Enum['latest','present','installed']`
-
-If installing, then this is the state that the packages should have.
-
-* This will be overridden by anything set in options applied to an entry in
-  the `$install` Hash.
-
-Default value: `simplib::lookup('simp_options::package_ensure', { 'default_value' => 'installed' })`
-
-##### <a name="-deferred_resources--packages--default_options"></a>`default_options`
-
-Data type: `Hash`
-
-A `Hash` of options to apply to all packages (both remove and install.
-If ensure is entered in these options it will be overwritten.
-
-* These options may be anything that a Puppet `Package` resource can
-  normally accept.
-
-Default value: `{}`
-
-##### <a name="-deferred_resources--packages--mode"></a>`mode`
-
-Data type: `Enum['warning','enforcing']`
-
-@see `deferred_resources::mode`
-
-Default value: `$deferred_resources::mode`
-
-##### <a name="-deferred_resources--packages--log_level"></a>`log_level`
-
-Data type: `Simplib::PuppetLogLevel`
-
-@see `deferred_resources::log_level`
-
-Default value: `$deferred_resources::log_level`
-
-### <a name="deferred_resources--users"></a>`deferred_resources::users`
-
-This class takes an Array of user resources to remove, and a Hash of user
-resources to install.
-
-After the entire puppet catalog has been compiled, it will process both lists
-and, for any resource that is not already defined in the catalog, it will
-take the appropriate action.
-
-An exception will be raised if you list the same user in both lists.
-
-#### Parameters
-
-The following parameters are available in the `deferred_resources::users` class:
-
-* [`remove`](#-deferred_resources--users--remove)
-* [`install`](#-deferred_resources--users--install)
-* [`mode`](#-deferred_resources--users--mode)
-* [`log_level`](#-deferred_resources--users--log_level)
-
-##### <a name="-deferred_resources--users--remove"></a>`remove`
-
-Data type: `Array[String[1]]`
-
-A list of users to remove.
-
-Default value: `[]`
-
-##### <a name="-deferred_resources--users--install"></a>`install`
-
-Data type: `Variant[Hash, Array[String[1]]]`
-
-A list of users to install.
-
-* A `Hash` can be used to add extra attributes for the user, but the
-  `ensure` attribute will always be set to `absent` for removal and
-  `present` for creation.
-
-Default value: `{}`
-
-##### <a name="-deferred_resources--users--mode"></a>`mode`
-
-Data type: `Enum['warning','enforcing']`
-
-@see `deferred_resources::mode`
-
-Default value: `$deferred_resources::mode`
-
-##### <a name="-deferred_resources--users--log_level"></a>`log_level`
-
-Data type: `Simplib::PuppetLogLevel`
-
-@see `deferred_resources::log_level`
-
-Default value: `$deferred_resources::log_level`
 
 ## Resource types
 
@@ -357,6 +134,13 @@ that resource in the compiled catalog. If the resource has already been
 defined in the catalog, it prints out a message that an action will
 not be performed.
 
+A resource entry may set the reserved control option `override` to `true`,
+in which case a matching resource that already exists in the catalog will
+have all of the attributes specified on the entry forced onto it. An
+attribute with a `nil` value will be *removed* from the existing resource
+(e.g. unsetting `source` when specifying `content`). `override` is never
+passed on to the created resource.
+
 If mode is set to `warning`, instead of adding resources to the catalog,
 it prints out a list of resources that would have been added.
 
@@ -368,7 +152,6 @@ The following parameters are available in the `deferred_resources` type.
 * [`log_level`](#-deferred_resources--log_level)
 * [`mode`](#-deferred_resources--mode)
 * [`name`](#-deferred_resources--name)
-* [`override_existing_attributes`](#-deferred_resources--override_existing_attributes)
 * [`resource_type`](#-deferred_resources--resource_type)
 * [`resources`](#-deferred_resources--resources)
 
@@ -401,25 +184,6 @@ Default value: `warning`
 namevar
 
 Unique name for this resource.
-
-##### <a name="-deferred_resources--override_existing_attributes"></a>`override_existing_attributes`
-
-A Hash or Array of items that should be updated on existing attributes if
-they exist.
-
-This is basically a controlled resource collector and absolutely must not
-be taken lightly when used since it will affect existing resources in
-your catalog.
-
-If you want to be explicit, use a Resource Collector and do not set this.
-
-If a Hash is passed, each key is the attribute that can be overridden and
-an optional hash of options can be passed with the following meanings.
-
-  * 'invalidates':
-    * An Array of entries that this particular parameter invalidates.
-      This means that the items in the list will be set to `nil` in the
-      overridden resource.
 
 ##### <a name="-deferred_resources--resource_type"></a>`resource_type`
 
