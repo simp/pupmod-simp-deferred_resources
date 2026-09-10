@@ -10,7 +10,7 @@ applied. It is intended to help meet common policy requirements ("this package /
 user / group / file must be present or absent") without conflicting with
 resources that other modules have already declared: for each requested resource,
 it checks whether that resource already exists in the compiled catalog and only
-takes action when it does not.
+takes action when it does not (unless a specific entry opts into overriding).
 
 The module is deliberately conservative. By default it runs in `warning` mode,
 where it only logs what it *would* have done and never mutates the catalog. It
@@ -19,190 +19,162 @@ Because it manipulates the catalog post-compilation, it is explicitly **not**
 meant for general use — read the warnings in `manifests/init.pp` and
 `lib/puppet/type/deferred_resources.rb` before extending it.
 
-### Business logic
+## Architecture
 
-The real work happens in a custom Puppet **type** (not a provider); the
-manifests are thin wrappers that translate Hiera-friendly parameters into
-instances of that type.
+Two layers: a custom Puppet **type** that does all the real work, and a single
+public wrapper **class** that translates a Hiera-friendly Hash into instances
+of that type. (Before 2.0.0 there were four per-type helper classes —
+`::packages`, `::users`, `::groups`, `::files` — with `remove`/`install`
+lists; they no longer exist.)
 
-- **`deferred_resources` type (`lib/puppet/type/deferred_resources.rb`)** — the
-  engine. It is **not meant to be called directly**; use the helper classes.
-  Its logic lives entirely inside an `autorequire(:file)` block, which Puppet
-  evaluates after compilation. For each entry in `:resources` it:
-  - Merges `:default_options` with the per-entry options and symbolises keys.
-  - Looks up an existing resource via `catalog.resource(Type, name)`.
-  - **If the resource already exists:**
-    - With `:override_existing_attributes` set and `mode == :enforcing`, it
-      mutates the existing catalog resource — setting the listed attributes and
-      deleting any attributes named in that attribute's `invalidates` list
-      (e.g. setting `content` invalidates `source`). This is effectively a
-      controlled resource collector and is the dangerous path.
-    - Without overrides, if the requested options match the existing resource it
-      logs a debug "Ignoring existing resource"; if they differ it logs at
-      `:log_level` that an existing resource has options that differ (a possible
-      policy violation).
-  - **If the resource does not exist:** in `enforcing` mode it calls
-    `catalog.create_resource(Type, opts)`; in `warning` mode it logs "Would have
-    created …" at `:log_level`.
-  - Key params: `:name` (namevar), `:resource_type` (string, matched `/.+/`),
-    `:resources` (Hash or Array — an Array is munged to a Hash of `{name => {}}`,
-    and each entry gets its `name` key populated), `:default_options` (Hash),
-    `:override_existing_attributes` (Hash/Array; only the `invalidates` control
-    option is accepted, validated at parse time), `:log_level` (defaults
-    `:warning`), and `:mode` (`:warning`/`:enforcing`, defaults `:warning`).
-  - The `autorequire` block always returns `[]` — it uses the autorequire hook
-    purely as a post-compile execution point and never actually declares an
-    autorequire edge.
+### `deferred_resources` type (`lib/puppet/type/deferred_resources.rb`)
 
-- **`deferred_resources` (`manifests/init.pp`)** — public entry class. Params:
-  `$auto_include` (`Boolean`, default `true`) includes the four sub-classes;
-  `$mode` (`Enum['warning','enforcing']`, default `'warning'`) and `$log_level`
-  (`Simplib::PuppetLogLevel`, default `'info'`) are the module-wide defaults
-  inherited by the sub-classes. (The custom *type* parameter `:log_level` defaults to `:warning`, but the public class `$log_level` defaults to `'info'`, so the effective log level for a plain `include deferred_resources` is `info`.) Including the class is safe by default because
-  the sub-classes do nothing until given resources and `mode` is `enforcing`.
+The engine. It is **not meant to be declared directly**; use the class. Its
+logic lives entirely inside an `autorequire(:file)` block, which Puppet
+evaluates on the agent after compilation but before application — the only
+window where the full catalog can be inspected and injected into. The block
+always returns `[]`; it is not a real autorequire and declares no dependency
+edges. Don't "fix" it into a normal autorequire.
 
-- **`deferred_resources::packages` (`manifests/packages.pp`)** —
-  `inherits deferred_resources`. Takes `$remove`/`$install` (`Variant[Hash,Array]`),
-  `$remove_ensure` (`Enum['absent','purged']`), `$install_ensure`
-  (`Enum['latest','present','installed']`), and `$default_options` (Hash). For a
-  non-empty `$remove`/`$install` it declares a `deferred_resources{}` instance
-  with `resource_type => 'package'`, merging `default_options` with the ensure
-  value. `$install_ensure` is the **only** `simplib::lookup` seam in the module
-  (see Gotchas).
+Processing per run:
 
-- **`deferred_resources::files` (`manifests/files.pp`)** —
-  `inherits deferred_resources`. Takes `$remove` (`Array[Stdlib::Absolutepath]`),
-  `$install` (`Hash[Stdlib::Absolutepath, Hash]`), and
-  `$update_existing_resources` (`Boolean`, default `false`). When
-  `$update_existing_resources` is true it builds
-  `$_override_existing_attributes = { owner => undef, group => undef, mode => undef,
-  content => { invalidates => ['source'] } }` and passes it through to the install
-  instance — this is the **DANGEROUS** path that edits resources already in the
-  catalog. Remove uses `ensure => absent`, install uses `ensure => present`.
+- Resolves the RAL class for `:resource_type`; an unknown type logs at
+  `:log_level` and skips all entries rather than failing the catalog run.
+- For isomorphic types, builds a namevar => resource map of the catalog once
+  per run. Catalog aliases are stored by composite uniqueness key (e.g.
+  `[provider, name]` for packages), so a resource managing the same underlying
+  entity under a different title cannot be found by a title lookup and would
+  otherwise raise a duplicate resource/alias error at creation time.
+- For each entry in `:resources`: merges `:default_options` under the entry's
+  options, symbolizes keys, and pops the reserved `override` control option.
+  Existing resources are found by title, then by explicit `name`, then via the
+  namevar map.
+  - **Resource exists, entry has `override: true`:** in `enforcing` mode every
+    attribute specified on the entry is forced onto the existing resource, and
+    an attribute explicitly set to `nil`/undef is **deleted** from it (e.g.
+    unsetting `source` when setting `content`); in `warning` mode it logs
+    "Would have overridden…". This is the dangerous, resource-collector-like
+    path.
+  - **Resource exists, no override:** identical options log a debug "Ignoring
+    existing resource"; differing options log at `:log_level` (a potential
+    policy violation). The existing resource always wins.
+  - **Resource missing:** `enforcing` calls `catalog.create_resource`
+    (nil-valued attributes are stripped); `warning` logs "Would have created…".
+- Key params: `:name` (namevar), `:resource_type` (String), `:resources`
+  (Hash or Array — an Array is munged to `{name => {}}` and every entry gets a
+  `name` key populated), `:default_options` (Hash), `:log_level` (defaults
+  `:warning`), `:mode` (`:warning`/`:enforcing`, defaults `:warning`). A
+  non-Boolean `override` value on an entry is rejected at validation.
 
-- **`deferred_resources::users` (`manifests/users.pp`)** and
-  **`deferred_resources::groups` (`manifests/groups.pp`)** — nearly identical.
-  Both `inherit deferred_resources`, take `$remove` (`Array[String[1]]`) and
-  `$install` (`Variant[Hash, Array[String[1]]]`), and declare
-  `deferred_resources{}` instances with `resource_type => 'user'`/`'group'`,
-  `ensure => absent` for remove and `ensure => present` for install.
+### `deferred_resources` class (`manifests/init.pp`)
 
-None of the sub-classes call `assert_private()`; they are documented as helpers
-but are technically public. Ordering is implicit — everything is deferred to the
-type's post-compile hook, so there are no explicit `require`/`notify` edges among
-these resources.
+The only public entry point. Parameters:
 
-### Gotchas / non-obvious details
+- `$resources` — `Hash[String[1], Hash[String[1], Optional[Hash]]]`, keyed by
+  resource type, e.g.
+  `{'package' => {'telnet' => {'ensure' => 'absent'}}, 'user' => {...}}`. Any
+  native type and any mix of types is accepted; one `deferred_resources` type
+  instance is declared per resource type.
+- `$default_options` — Hash keyed by resource type, applied under every entry
+  of that type (may include `override` to default it type-wide; entries can
+  opt back out with `override => false`).
+- `$mode` (`Enum['warning','enforcing']`, default `'warning'`) and
+  `$log_level` (`Simplib::PuppetLogLevel`, default `'info'`; the *type's* own
+  default is `:warning`, so the effective level via the class is `info`).
+
+The class fails at **compile time** (rather than nondeterministically at apply
+time) when:
+
+- the same resource type appears twice in `$resources` after case
+  normalization (`package` + `Package`);
+- two entries of a type reference the same underlying resource via their title
+  or an explicit `name` attribute;
+- an entry's `override` option is not a Boolean.
+
+## Gotchas / non-obvious details
 
 - **`warning` is the default mode.** Nothing is added or changed until `$mode`
-  is set to `enforcing`. In `warning` mode the module only logs. This is the
-  single most surprising trait for someone expecting resources to appear.
-- **`update_existing_resources` (files) mutates existing catalog resources.**
-  It is the only path that changes resources declared by other modules, and
-  setting `content` deletes `source` on the target via the `invalidates`
-  mechanism. Treat it as a controlled resource collector; the module docs
-  recommend a real Resource Collector instead when you want to be explicit.
-- **The type does its work in an `autorequire(:file)` block.** This is a
-  deliberate hack to run code post-compilation; it is not a real autorequire and
-  always returns `[]`. Don't "fix" it into a normal autorequire.
-- **`simp/simplib` is declared and IS used, but only in one place.** Metadata
-  declares `simp/simplib`, and `manifests/packages.pp` uses exactly one
-  `simplib::lookup` seam: `$install_ensure` defaults to
-  `simplib::lookup('simp_options::package_ensure', { 'default_value' => 'installed' })`.
-  No other manifest references `simp_options::*` or `simplib::lookup`; simplib is
-  otherwise used only for the `Simplib::PuppetLogLevel` data type.
-- **Array vs Hash resources are normalised in the type.** Passing an Array of
-  names is munged into `{name => {}}`; each entry always gets a `name` key. The
-  helper classes raise if the same item appears in both `remove` and `install`
-  (documented behaviour; the collision surfaces as a duplicate-resource error).
-- **`override_existing_attributes` validation is strict.** The only accepted
-  control option is `invalidates`, and its value must be an Array; anything else
-  raises at catalog compile time.
-- **Deep-merge Hiera lookups.** `data/common.yaml` sets `lookup_options` so all
-  `remove`/`install`/`default_options` parameters deep-merge across the
-  hierarchy, with a `--` knockout prefix on the `install`/`default_options`
-  keys. Contributions to these keys accumulate rather than replace.
+  is `enforcing`; the module only logs. This is the single most surprising
+  trait for someone expecting resources to appear.
+- **`override` is a reserved attribute name.** It is popped from the entry's
+  options and never reaches the real resource, so a resource attribute
+  literally named `override` cannot be managed through this module.
+- **Overrides enforce exactly what the entry specifies.** There is no
+  per-attribute allow-list; every attribute on an overriding entry is applied,
+  and explicit undef (`~` in YAML) removes the attribute from the existing
+  resource. This replaced the pre-2.0.0
+  `update_existing_resources`/`override_existing_attributes`/`invalidates`
+  mechanism.
+- **Deep-merge Hiera lookups.** `data/common.yaml` sets `lookup_options` with
+  deep merge and a `--` knockout prefix for `deferred_resources::resources`
+  and `deferred_resources::default_options`; SIMP stack data is expected to
+  merge into these hashes.
+- **simplib is only used for the `Simplib::PuppetLogLevel` data type.** The
+  pre-2.0.0 `simplib::lookup('simp_options::package_ensure', ...)` seam was
+  removed with the packages class.
 
-## Dependencies
+## Dependencies and support
 
-Module dependencies (from `metadata.json`):
-
-- `simp/simplib` (`>= 4.9.0 < 5.0.0`) — provides `simplib::lookup` and the
-  `Simplib::PuppetLogLevel` type.
-- `puppetlabs/stdlib` (`>= 8.0.0 < 10.0.0`) — provides `Stdlib::Absolutepath`.
-
-Fixture-only dependencies (from `.fixtures.yml`): `simplib` and `stdlib` are
-pulled from their SIMP GitHub repos; the module itself is symlinked in.
-
-Runtime requirement (from `metadata.json` `requirements`): `puppet >= 7.0.0 < 9.0.0`.
-(SIMP is migrating Puppet → OpenVox; when `metadata.json` switches this to
-`openvox`, update this line to match.)
-
-Supported OS matrix (from `metadata.json`):
-
-- Amazon 2
-- CentOS 7, 8, 9
-- RedHat 7, 8, 9
-- OracleLinux 7, 8, 9
-- Rocky 8, 9
-- AlmaLinux 8, 9
+- `simp/simplib` and `puppetlabs/stdlib` (see `metadata.json` for ranges).
+- Runtime requirement: `openvox >= 8.0.0 < 9.0.0`.
+- Supported OSes: EL8/9/10 family (CentOS, RedHat, OracleLinux, Rocky,
+  AlmaLinux) per `metadata.json`.
+- Fixtures (`.fixtures.yml`): `simplib` and `stdlib` clone from GitHub;
+  `puppet_fixtures` symlinks the module itself automatically.
 
 ## Repository layout
 
-- `manifests/init.pp` — public class `deferred_resources` (mode/log_level defaults, auto-include).
-- `manifests/packages.pp` / `users.pp` / `groups.pp` / `files.pp` — helper classes per resource type.
+- `manifests/init.pp` — the single public class.
 - `lib/puppet/type/deferred_resources.rb` — the custom type that does all the post-compile work.
-- `types/` — present but empty (no custom Puppet data types defined here).
-- `templates/` — present but empty.
-- `data/common.yaml` + `hiera.yaml` — module Hiera data; `common.yaml` holds the deep-merge `lookup_options`.
-- `spec/classes/` — rspec-puppet unit tests for each helper class.
-- `spec/unit/puppet/type/deferred_resources_spec.rb` — unit tests for the custom type.
-- `spec/acceptance/suites/default/` and `spec/acceptance/suites/compliance/` — beaker acceptance suites; `nodesets/` holds per-OS node definitions.
-- `REFERENCE.md` — generated Puppet Strings reference (do not hand-edit; regenerate).
-- `metadata.json` — module metadata, dependencies, supported OS matrix.
-- `.github/workflows/pr_tests.yml` — PR CI.
-
-**CI does not run acceptance/beaker.** `pr_tests.yml` runs syntax, lint,
-rubocop, file-checks, RELENG checks, and `rake spec` (Puppet 7 and 8 matrix)
-only. The beaker suites under `spec/acceptance/` must be run manually.
+- `data/common.yaml` + `hiera.yaml` — module Hiera data (deep-merge `lookup_options`).
+- `spec/classes/init_spec.rb` — rspec-puppet tests for the class (including the compile-time failure modes).
+- `spec/unit/puppet/type/deferred_resources_spec.rb` — unit tests for the type (including override, namevar-collision, and unknown-type behavior).
+- `spec/acceptance/suites/default/` — Beaker: mixed-type warning/enforcing flow and per-resource override suites.
+- `spec/acceptance/suites/compliance/` — Beaker: STIG-like enforcement expressed through the module's own Hiera API (no `compliance_markup` dependency).
+- `REFERENCE.md` — generated by openvox-strings (`rake strings:generate:reference`); do not hand-edit.
+- `types/` and `templates/` — present but empty.
 
 ## Common commands
 
-Rake tasks come from `Simp::Rake::Pupmod::Helpers` (see `Rakefile`). Gem pins of
-note (from `Gemfile`): `puppetlabs_spec_helper ~> 8.0.0`,
-`simp-rake-helpers ~> 5.24.0`, `simp-beaker-helpers ~> 2.0.0`.
+Rake tasks come from `simp-rake-helpers` (see `Rakefile`); run
+`bundle exec rake -T` for the full list. The test toolchain is OpenVox-based
+(`voxpupuli-test` provides the spec_helper and manages the rubocop pins).
 
 ```sh
-bundle install
-
-# Unit tests (rspec-puppet + type unit tests)
-bundle exec rake spec
-
-# Run a single spec file
-bundle exec rspec spec/unit/puppet/type/deferred_resources_spec.rb
-
-# Lint / style
-bundle exec rake lint
-bundle exec rake rubocop
-
-# Regenerate REFERENCE.md after changing manifest docstrings
-bundle exec puppet strings generate --format markdown --out REFERENCE.md
-
-# Acceptance tests (beaker; needs a hypervisor — NOT run in CI)
-bundle exec rake beaker:suites[default]
+bundle install                        # first-time setup
+bundle exec rake spec                 # unit tests (spec_prep clones fixtures; spec cleans them afterwards)
+bundle exec rake spec_prep            # re-clone fixtures (needed before running rspec directly)
+bundle exec rspec spec/classes/init_spec.rb              # single spec file
+bundle exec rspec spec/unit/puppet/type/deferred_resources_spec.rb  # type unit tests
+bundle exec rake validate             # puppet parser validation
+bundle exec rake lint                 # puppet-lint (config in .puppet-lint.rc)
+bundle exec rake metadata_lint        # metadata.json lint
+bundle exec rake rubocop              # Ruby style (lib/, spec/)
 ```
 
-Note `.rspec` sets `--fail-fast`, so `rake spec` stops at the first failure.
+Acceptance tests (Beaker; Vagrant/VirtualBox by default, Docker nodesets
+available):
+
+```sh
+bundle exec rake beaker:suites                          # all suites, default nodeset
+bundle exec rake beaker:suites[default,docker_rocky9]   # one suite on a docker nodeset
+BEAKER_destroy=no bundle exec rake beaker:suites        # keep VMs for debugging
+```
+
+CI (`.github/workflows/pr_tests.yml`) runs syntax/lint/rubocop/spec on OpenVox
+8 (Ruby 3.2 and 3.4) plus an OpenVox 9 / Ruby 4.0 preview, and runs the
+**default** beaker suite on docker nodesets; the `compliance` suite must be
+run manually.
 
 ## Conventions
 
-- This is a component of the SIMP ecosystem. Follow SIMP module conventions.
-- The safety posture is the whole point: `warning` mode must stay the default,
-  and any new resource type must keep the "only act on resources not already in
-  the catalog" contract. Do not make the module clobber existing resources
-  except through the explicit `override_existing_attributes` path.
-- The custom type is the load-bearing code. Keep its post-compile
-  (`autorequire`) execution model, its Array→Hash munging, and its strict
-  `override_existing_attributes` validation intact when editing.
-- Keep manifest parameter `@param` docstrings and the type's `desc` strings
-  current — `REFERENCE.md` is generated from them.
+- `Gemfile`, `spec/spec_helper.rb`, `.gitignore`, and `.github/workflows/` are
+  marked **maintained with puppetsync** — local edits will be overwritten by
+  the next baseline sync; don't fix things there.
+- Unit tests use `simp-rspec-puppet-facts` (`on_supported_os`) and iterate
+  over the OSes in `metadata.json`.
+- Tests and examples rely on nothing being changed on a system unless
+  `enforcing` is explicit.
+- In rspec-puppet params, use `:undef` (not Ruby `nil`) for undef values;
+  catalog matchers see the type's munged values (entries gain `name`, nil
+  options become `{}`).
