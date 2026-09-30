@@ -11,8 +11,9 @@
 * [Description](#description)
   * [This is a SIMP module](#this-is-a-simp-module)
 * [Usage](#usage)
-  * [Example: Managing Packages](#example-managing-packages)
-  * [Example: Managing Packages but silencing messages](#example-managing-packages-but-silencing-messages)
+  * [Example: Managing a mix of resources](#example-managing-a-mix-of-resources)
+  * [Example: The same configuration via Hiera, silencing messages](#example-the-same-configuration-via-hiera-silencing-messages)
+  * [Example: Overriding attributes on existing catalog resources](#example-overriding-attributes-on-existing-catalog-resources)
 * [Reference](#reference)
 * [Limitations](#limitations)
 * [Development](#development)
@@ -61,28 +62,72 @@ it can be used independently:
 
 ## Usage
 
-This module provides classes that help users properly use the underlying native
-type for processing deferred resources.
+This module provides a single class, `deferred_resources`, that helps users
+properly use the underlying native type for processing deferred resources. It
+accepts a Hash of resources, keyed by resource type, and does not care which
+resource types are passed to it.
 
-### Example: Managing Packages
+Resources that already exist in the catalog are never touched unless an entry
+sets the reserved `override` option to `true`, in which case only the
+attributes specified on that entry are updated on the existing resource.
+
+### Example: Managing a mix of resources
 
 ```
-  class { 'deferred_resources::packages':
-    'remove'  => ['pkg1', 'pkg2'],
-    'install' => ['pkg3', 'pkg4'],
-    'mode'    => 'enforcing'
+  class { 'deferred_resources':
+    'resources' => {
+      'package' => {
+        'pkg1' => { 'ensure' => 'absent' },
+        'pkg2' => { 'ensure' => 'absent' },
+        'pkg3' => { 'ensure' => 'installed' },
+      },
+      'user' => {
+        'baduser' => { 'ensure' => 'absent' },
+      },
+    },
+    'mode'      => 'enforcing'
   }
 ```
 
-### Example: Managing Packages but silencing messages
+### Example: The same configuration via Hiera, silencing messages
 
+```yaml
+deferred_resources::mode: 'enforcing'
+deferred_resources::log_level: 'debug'
+deferred_resources::resources:
+  package:
+    pkg1:
+      ensure: 'absent'
+    pkg2:
+      ensure: 'absent'
+    pkg3:
+      ensure: 'installed'
+  user:
+    baduser:
+      ensure: 'absent'
 ```
-  class { 'deferred_resources::packages':
-    'remove'    => ['pkg1', 'pkg2'],
-    'install'   => ['pkg3', 'pkg4'],
-    'mode'      => 'enforcing',
-    'log_level' => 'debug'
-  }
+
+### Example: Overriding attributes on existing catalog resources
+
+**WARNING:** This is effectively a controlled resource collector — make sure
+you understand the ramifications before using it.
+
+Setting `override: true` on an entry forces all of the attributes specified on
+that entry onto a matching resource that already exists in the catalog. An
+attribute explicitly set to `~` (undef) is *removed* from the existing
+resource — here, `source` is unset so it cannot conflict with the new
+`content`. The `override` key is reserved and is never passed to the resource.
+
+```yaml
+deferred_resources::mode: 'enforcing'
+deferred_resources::resources:
+  file:
+    /etc/motd:
+      ensure: 'file'
+      owner: 'root'
+      content: 'Authorized use only'
+      source: ~
+      override: true
 ```
 
 ## Reference
