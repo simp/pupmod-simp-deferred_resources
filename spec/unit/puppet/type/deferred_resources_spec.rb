@@ -115,9 +115,8 @@ describe Puppet::Type.type(:deferred_resources) do
     let(:catalog) { Puppet::Resource::Catalog.new }
 
     before(:each) do
-      # rubocop:disable RSpec/AnyInstance
+      # rubocop:disable-next RSpec/AnyInstance
       allow_any_instance_of(Puppet::Type::Deferred_resources).to receive(:catalog).and_return(catalog)
-      # rubocop:enable RSpec/AnyInstance
     end
 
     context 'when enforcing' do
