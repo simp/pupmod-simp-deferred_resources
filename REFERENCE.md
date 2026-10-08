@@ -430,4 +430,3 @@ The type of Puppet resource that will be passed in :resources
 ##### <a name="-deferred_resources--resources"></a>`resources`
 
 A Hash or Array of resources to add to the catalog.
-
