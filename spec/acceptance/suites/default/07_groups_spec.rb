@@ -77,12 +77,12 @@ describe 'deferred group resources' do
 
           # groups that are only in deferred_resources::groups::remove
           ['oh_the_humanity_group'].each do |group|
-            expect(result.stdout).to match(%r{Would have created Group\[#{group}\] with .*:ensure=>"absent"}m)
+            expect(result.stdout).to match(%r{Would have created Group\[#{group}\] with .*(?::ensure=>|ensure: )"absent"}m)
           end
 
           # groups that are only in deferred_resources::groups::install
           ['hello_there_group'].each do |group|
-            expect(result.stdout).to match(%r{Would have created Group\[#{group}\] with.*:ensure=>"present"}m)
+            expect(result.stdout).to match(%r{Would have created Group\[#{group}\] with.*(?::ensure=>|ensure: )"present"}m)
           end
         end
 

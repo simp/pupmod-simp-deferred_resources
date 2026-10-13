@@ -94,12 +94,12 @@ describe 'deferred file resources' do
 
           # files that are only in deferred_resources::files::remove
           ['/tmp/rm_file1'].each do |file|
-            expect(result.stdout).to match(%r{Would have created File\[#{file}\] with .*:ensure=>"absent"}m)
+            expect(result.stdout).to match(%r{Would have created File\[#{file}\] with .*(?::ensure=>|ensure: )"absent"}m)
           end
 
           # files that are only in deferred_resources::files::install
           ['/tmp/add_file2'].each do |file|
-            expect(result.stdout).to match(%r{Would have created File\[#{file}\] with.*:ensure=>"present"}m)
+            expect(result.stdout).to match(%r{Would have created File\[#{file}\] with.*(?::ensure=>|ensure: )"present"}m)
           end
         end
 
