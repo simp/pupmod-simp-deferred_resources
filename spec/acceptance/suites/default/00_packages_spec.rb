@@ -73,12 +73,12 @@ describe 'deferred package resources' do
 
           # packages that are only in deferred_resources::packages::remove
           ['vsftpd', 'telnet'].each do |pkg|
-            expect(result.stdout).to match(%r{Would have created Package\[#{pkg}\] with .*:ensure=>"absent"}m)
+            expect(result.stdout).to match(%r{Would have created Package\[#{pkg}\] with .*(?::ensure=>|ensure: )"absent"}m)
           end
 
           # packages that are only in deferred_resources::packages::install
           ['zsh'].each do |pkg|
-            expect(result.stdout).to match(%r{Would have created Package\[#{pkg}\] with.*:ensure=>"present"}m)
+            expect(result.stdout).to match(%r{Would have created Package\[#{pkg}\] with.*(?::ensure=>|ensure: )"present"}m)
           end
         end
 

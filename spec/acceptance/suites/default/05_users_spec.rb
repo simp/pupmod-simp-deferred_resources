@@ -77,12 +77,12 @@ describe 'deferred user resources' do
 
           # users that are only in deferred_resources::users::remove
           ['oh_the_humanity'].each do |user|
-            expect(result.stdout).to match(%r{Would have created User\[#{user}\] with .*:ensure=>"absent"}m)
+            expect(result.stdout).to match(%r{Would have created User\[#{user}\] with .*(?::ensure=>|ensure: )"absent"}m)
           end
 
           # users that are only in deferred_resources::users::install
           ['hello_there'].each do |user|
-            expect(result.stdout).to match(%r{Would have created User\[#{user}\] with.*:ensure=>"present"}m)
+            expect(result.stdout).to match(%r{Would have created User\[#{user}\] with.*(?::ensure=>|ensure: )"present"}m)
           end
         end
 
